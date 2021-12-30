@@ -17,6 +17,12 @@ const { ComponentDialog,
         WaterfallDialog 
     } = require('botbuilder-dialogs');
 
+//Import secondary dialogs
+const {
+    TRANSLATE_DIALOG,
+    TranslateDialog
+} = require('./translateDialog');
+
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const MAIN_DIALOG = 'MAIN_DIALOG'
 const TEXT_PROMPT = 'TEXT_PROMPT';
@@ -29,6 +35,7 @@ class MainDialog extends ComponentDialog {
         this.luisRecognizer = luisRecognizer;
         this.userState = userState;
         //Adding used dialogs
+        this.addDialog(new TranslateDialog());
         this.addDialog(new TextPrompt('TEXT_PROMPT'));
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
                 this.introStep.bind(this),
@@ -130,24 +137,21 @@ class MainDialog extends ComponentDialog {
         console.log(option);
             console.log("Sono qui 1");
             const luisResult = await this.luisRecognizer.executeLuisQuery(step.context);
-            console.log("Sono qui");
             if(option === "Traduci" || LuisRecognizer.topIntent(luisResult) === 'Traduzione' ) {
-                console.log("Sono quiiiiiii");
-                console.log("Sono qui");
-                await step.context.sendActivity("Traduco");
+                console.log("Vado nel dialogo che gestisce la traduzione");
+                return await step.beginDialog("TRANSLATE_DIALOG");
             }
 
-            else if(option === "Tradurre un file audio in testuale" || LuisRecognizer.topIntent(luisResult) === 'Conversione Audio-Testo') {
-                console.log("Sono quiiiiiii1111");
-                await step.context.sendActivity("Audio in testo");
+            else if(option === "Tradurre un file audio in testuale" || LuisRecognizer.topIntent(luisResult) === 'AudioTesto') {
+               
             }
 
-            else if(option === "Tradurre un file testuale in audio" || LuisRecognizer.topIntent(luisResult) === 'Conversione Testo-Audio') {
+            else if(option === "Tradurre un file testuale in audio" || LuisRecognizer.topIntent(luisResult) === 'TestoAudio') {
 
                 await step.context.sendActivity("Testo in audio");
             }
 
-            else if(option === "Prendere testo da immagine" || LuisRecognizer.topIntent(luisResult) === 'Testo da Immagine') {
+            else if(option === "Prendere testo da immagine" || LuisRecognizer.topIntent(luisResult) === 'TestoDaImmagine') {
 
                 await step.context.sendActivity("Testo da Immagine");
             }
