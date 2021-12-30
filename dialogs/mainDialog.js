@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-const { TimexProperty } = require('@microsoft/recognizers-text-data-types-timex-expression');
 const { MessageFactory, 
         InputHints,
         ActivityTypes,
@@ -35,7 +34,7 @@ class MainDialog extends ComponentDialog {
         this.luisRecognizer = luisRecognizer;
         this.userState = userState;
         //Adding used dialogs
-        this.addDialog(new TranslateDialog());
+        this.addDialog(new TranslateDialog(luisRecognizer));
         this.addDialog(new TextPrompt('TEXT_PROMPT'));
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
                 this.introStep.bind(this),
