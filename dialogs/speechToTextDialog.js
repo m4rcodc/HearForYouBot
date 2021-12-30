@@ -1,7 +1,7 @@
 const fs = require('fs');
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
 const speechConfig = sdk.SpeechConfig.fromSubscription("68befe3c7508400196b3472c4a12ac66", "westeurope");
-speechConfig.speechRecognitionLanguage = "it";
+speechConfig.speechRecognitionLanguage = "it-IT";
 
 const {
     ActionTypes,
@@ -58,14 +58,33 @@ class SpeechToTextDialog extends ComponentDialog {
         console.log("Sono qui nel metodo");
         const resultFile = step.result;
             
-           function fromFile() {
-            fs.createReadStream('Registrazione.wav').on('data', function(arrayBuffer) {
-                pushStream.write(arrayBuffer.slice());
-              }).on('end', function() {
-                pushStream.close();
-              });
-        }
+        function fromFile() {
+            let audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync("./regIta.wav"));
+            let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
 
+            recognizer.recognizeOnceAsync(result => {
+                switch (result.reason) {
+                    case sdk.ResultReason.RecognizedSpeech:
+                        console.log(`RECOGNIZED: Text=${result.text}`);
+                        recognizer.close();
+                        break;
+                    case sdk.ResultReason.NoMatch:
+                        console.log("NOMATCH: Speech could not be recognized.");
+                        break;
+                    case sdk.ResultReason.Canceled:
+                        const cancellation = CancellationDetails.fromResult(result);
+                        console.log(`CANCELED: Reason=${cancellation.reason}`);
+
+                        if (cancellation.reason == sdk.CancellationReason.Error) {
+                            console.log(`CANCELED: ErrorCode=${cancellation.ErrorCode}`);
+                            console.log(`CANCELED: ErrorDetails=${cancellation.errorDetails}`);
+                            console.log("CANCELED: Did you update the key and location/region info?");
+                        }
+                        break;
+                }
+                recognizer.close();
+            });
+        }
         fromFile();
     
 }
