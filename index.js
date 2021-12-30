@@ -24,15 +24,15 @@ const {
     UserState
 } = require('botbuilder');
 
-const { FlightBookingRecognizer } = require('./dialogs/flightBookingRecognizer');
+const { HearForYouRecognizer } = require('./dialogs/HearForYouRecognizer');
 
 // This bot's main dialog.
 const { DialogAndWelcomeBot } = require('./bots/dialogAndWelcomeBot');
 const { MainDialog } = require('./dialogs/mainDialog');
 
 // the bot's booking dialog
-const { BookingDialog } = require('./dialogs/bookingDialog');
-const BOOKING_DIALOG = 'bookingDialog';
+//const { BookingDialog } = require('./dialogs/bookingDialog');
+//const BOOKING_DIALOG = 'bookingDialog';
 
 const credentialsFactory = new ConfigurationServiceClientCredentialFactory({
     MicrosoftAppId: process.env.MicrosoftAppId,
@@ -89,11 +89,10 @@ const userState = new UserState(memoryStorage);
 const { LuisAppId, LuisAPIKey, LuisAPIHostName } = process.env;
 const luisConfig = { applicationId: LuisAppId, endpointKey: LuisAPIKey, endpoint: `https://${ LuisAPIHostName }` };
 
-const luisRecognizer = new FlightBookingRecognizer(luisConfig);
+const luisRecognizer = new HearForYouRecognizer(luisConfig);
 
 // Create the main dialog.
-const bookingDialog = new BookingDialog(BOOKING_DIALOG);
-const dialog = new MainDialog(luisRecognizer, bookingDialog);
+const dialog = new MainDialog(luisRecognizer, userState);
 const bot = new DialogAndWelcomeBot(conversationState, userState, dialog);
 
 // Create HTTP server
@@ -112,6 +111,7 @@ server.post('/api/messages', async (req, res) => {
     await adapter.process(req, res, (context) => bot.run(context));
 });
 
+/*
 // Listen for Upgrade requests for Streaming.
 server.on('upgrade', async (req, socket, head) => {
     // Create an adapter scoped to this WebSocket connection to allow storing session data.
@@ -122,3 +122,4 @@ server.on('upgrade', async (req, socket, head) => {
 
     await streamingAdapter.process(req, socket, head, (context) => bot.run(context));
 });
+*/

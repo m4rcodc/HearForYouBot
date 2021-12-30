@@ -3,7 +3,7 @@
 
 const { LuisRecognizer } = require('botbuilder-ai');
 
-class FlightBookingRecognizer {
+class HearForYouRecognizer {
     constructor(config) {
         const luisIsConfigured = config && config.applicationId && config.endpointKey && config.endpoint;
         if (luisIsConfigured) {
@@ -28,7 +28,7 @@ class FlightBookingRecognizer {
     async executeLuisQuery(context) {
         return await this.recognizer.recognize(context);
     }
-
+/*
     getFromEntities(result) {
         let fromValue, fromAirportValue;
         if (result.entities.$instance.From) {
@@ -57,6 +57,7 @@ class FlightBookingRecognizer {
      * This value will be a TIMEX. And we are only interested in a Date so grab the first result and drop the Time part.
      * TIMEX is a format that represents DateTime expressions that include some ambiguity. e.g. missing a Year.
      */
+    /*
     getTravelDate(result) {
         const datetimeEntity = result.entities.datetime;
         if (!datetimeEntity || !datetimeEntity[0]) return undefined;
@@ -67,6 +68,7 @@ class FlightBookingRecognizer {
         const datetime = timex[0].split('T')[0];
         return datetime;
     }
+    */
 }
 
-module.exports.FlightBookingRecognizer = FlightBookingRecognizer;
+module.exports.HearForYouRecognizer = HearForYouRecognizer;
