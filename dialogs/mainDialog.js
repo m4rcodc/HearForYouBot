@@ -22,6 +22,11 @@ const {
     TranslateDialog
 } = require('./translateDialog');
 
+const {
+    SPEECHTOTEXT_DIALOG,
+    SpeechToTextDialog
+} = require('./speechToTextDialog');
+
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const MAIN_DIALOG = 'MAIN_DIALOG'
 const TEXT_PROMPT = 'TEXT_PROMPT';
@@ -34,6 +39,7 @@ class MainDialog extends ComponentDialog {
         this.luisRecognizer = luisRecognizer;
         this.userState = userState;
         //Adding used dialogs
+        this.addDialog(new SpeechToTextDialog());
         this.addDialog(new TranslateDialog(luisRecognizer));
         this.addDialog(new TextPrompt('TEXT_PROMPT'));
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
@@ -142,7 +148,8 @@ class MainDialog extends ComponentDialog {
             }
 
             else if(option === "Tradurre un file audio in testuale" || LuisRecognizer.topIntent(luisResult) === 'AudioTesto') {
-               
+                console.log("Vado nel dialogo che gestisce lo SpeechToText");
+                return await step.beginDialog("SPEECHTOTEXT_DIALOG");
             }
 
             else if(option === "Tradurre un file testuale in audio" || LuisRecognizer.topIntent(luisResult) === 'TestoAudio') {

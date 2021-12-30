@@ -22,6 +22,7 @@
         "botbuilder-dialogs": "~4.15.0",
         "botbuilder-testing": "~4.15.0",
         "dotenv": "^8.6.0",
+        "microsoft-cognitiveservices-speech-sdk": "^1.19.0",
         "moment-timezone": "~0.5.33",
         "request": "^2.88.2",
         "restify": "~8.6.0"

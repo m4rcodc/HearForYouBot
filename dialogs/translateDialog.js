@@ -167,9 +167,10 @@ class TranslateDialog extends ComponentDialog {
                 'text': option
             }],
             responseType: 'json'
-        }).then(async function(response){
+        }).then(function(response){
 
-            await step.context.sendActivity.toString(response.data);
+            var string = JSON.stringify(response.data, null, 4);
+            console.log(string);
         })
 
     }
