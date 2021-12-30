@@ -133,6 +133,7 @@ class MainDialog extends ComponentDialog {
             console.log("Sono qui");
             if(option === "Traduci" || LuisRecognizer.topIntent(luisResult) === 'Traduzione' ) {
                 console.log("Sono quiiiiiii");
+                console.log("Sono qui");
                 await step.context.sendActivity("Traduco");
             }
 
