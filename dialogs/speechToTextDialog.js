@@ -7,6 +7,7 @@ const {
     ActionTypes,
     ActivityTypes,
     CardFactory,
+    ActivityHandler
 } = require('botbuilder');
 const { LuisRecognizer } = require('botbuilder-ai');
 const {
@@ -26,7 +27,7 @@ class SpeechToTextDialog extends ComponentDialog {
     constructor(userState) {
         super(SPEECHTOTEXT_DIALOG);
 
-
+        this.userState = userState;
         this.addDialog(new TextPrompt('TEXT_PROMPT'));
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.introStep.bind(this),

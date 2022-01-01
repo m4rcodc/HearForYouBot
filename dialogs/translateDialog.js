@@ -1,5 +1,4 @@
 // Import required types from libraries
-import axios from 'axios';
 const axios = require('axios').default;
 const { v4: uuidv4 } = require('uuid');
 var subscriptionKey = "7effd08ae926474c95b33871fc35d9f2";
@@ -39,8 +38,7 @@ class TranslateDialog extends ComponentDialog {
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.chiediLinguaStep.bind(this),
             this.optionLinguaStep.bind(this),
-            this.traduciTestoStep.bind(this),
-            //this.mostraTestoTradottoStep.bind(this)
+            this.traduciTestoStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
@@ -101,14 +99,13 @@ class TranslateDialog extends ComponentDialog {
             prompt: 'Scrivimi la lingua in cui vuoi tradurre il testo'
         });
 
-        
-
+    
     }
 
     async optionLinguaStep(step) {
         console.log("OPTION LINGUA STEP");
 
-        const lingua = step.result.value;
+        const lingua = step.result;
         console.log(lingua);
 
         console.log("SonoQui1");
@@ -146,13 +143,14 @@ class TranslateDialog extends ComponentDialog {
 
     }
 
-
+    
+    
     async traduciTestoStep(step){
-        console.log("Sono qui2");
+        
         const option = step.result;
-        
-        
-        axios({
+        var prova = null;
+
+        var axiosOptions = {
             baseURL: endpoint,
             url: '/translate',
             method: 'post',
@@ -170,34 +168,24 @@ class TranslateDialog extends ComponentDialog {
                 'text': option
             }],
             responseType: 'json'
-        }).then(function(response){
-            
+        }
 
-            var string = JSON.stringify(response.data, null, 4);
+        const res = await axios(axiosOptions);
 
+        if (res.status = 200) {
+
+            var string = JSON.stringify(res.data,null,4);
             const pos = string.indexOf("to");
             var stringProva;
             stringProva =string.substring(167,pos-20);
-            stringaTradotta = stringProva;
-            console.log(stringaTradotta)
-            console.log("Ho tradotto la stringa");
-    
-        })
-
+            
+            await step.context.sendActivity(stringProva);
         
-        console.log("Prima di stampare");
-        console.log(stringaTradotta);
-        return await step.context.sendActivity(stringaTradotta);
-       // return await step.replaceDialog(this.id);
+        }
 
+        return await step.replaceDialog(this.id);
     }
-
-    /*
-    async mostraTestoTradottoStep(step) {
-        console.log("Sono qui3");
-       return await step.context.sendActivity(stringaTradotta);
-    }
-        */
+    
 }
 
 module.exports.TranslateDialog = TranslateDialog;
