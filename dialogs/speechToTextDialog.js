@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
 const speechConfig = sdk.SpeechConfig.fromSubscription("68befe3c7508400196b3472c4a12ac66", "westeurope");
 speechConfig.speechRecognitionLanguage = "it-IT";
@@ -54,6 +55,70 @@ class SpeechToTextDialog extends ComponentDialog {
             prompt: 'Dammi un file audio in input'
         });
     }
+
+    async downloadAttachmentAndWrite(attachment) {
+        // Retrieve the attachment via the attachment's contentUrl.
+        const url = attachment.contentUrl;
+
+        // Local file path for the bot to save the attachment.
+        const localFileName = path.join(__dirname, attachment.name);
+
+        try {
+            // arraybuffer is necessary for images
+            const response = await axios.get(url, { responseType: 'arraybuffer' });
+            // If user uploads JSON file, this prevents it from being written as "{"type":"Buffer","data":[123,13,10,32,32,34,108..."
+            /*if (response.headers['content-type'] === 'application/json') {
+                response.data = JSON.parse(response.data, (key, value) => {
+                    return value && value.type === 'Buffer' ? Buffer.from(value.data) : value;
+                });
+            }*/
+            fs.writeFile(localFileName, response.data, (fsError) => {
+                if (fsError) {
+                    throw fsError;
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            return undefined;
+        }
+        // If no error was thrown while writing to disk, return the attachment's name
+        // and localFilePath for the response back to the user.
+        return {
+            fileName: attachment.name,
+            localPath: localFileName
+        };
+    }
+
+     async recognizeAudio(audio) {
+		const audioFile = await this.downloadAttachmentAndWrite(audio);
+
+		async function fromFileOgg(name) {
+			const dir = path.join(__dirname.replace('dialog', 'bot'), '/audio/');
+			const newName = name.split('.')[0] + '.wav';
+
+			let command = ffmpeg(path.join(dir, name))
+				.outputOptions('-ar 16000')
+				.format('wav');
+
+			function promisifyCommand(command) {
+				return Bluebird.Promise.promisify((cb) => {
+					command
+						.on('end', () => {
+							cb(null, 'Ciao');
+						})
+						.save(path.join(dir, newName));
+				});
+			}
+
+			let result;
+			await promisifyCommand(command)();
+			result = await fromFile(dir, newName);
+			result = await result();
+			return result.text;
+		}
+     }
+
+
 
     async speechToText(step) {
         console.log("Sono qui nel metodo");
