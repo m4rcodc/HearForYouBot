@@ -61,7 +61,6 @@ class OcrDialog extends ComponentDialog {
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.introStep.bind(this),
             this.downloadAttachStep.bind(this),
-            this.ocrStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG
@@ -103,14 +102,10 @@ class OcrDialog extends ComponentDialog {
        
         // var resultTemp = task.Result;
         var resultTemp = await computerVision();
-        await sleep(10000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
+        await sleep(1000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
         await step.context.sendActivity(textEdit);
 }
 
-    async ocrStep(step){
-
-
-    }
 }
     async function computerVision() {
         async.series([
