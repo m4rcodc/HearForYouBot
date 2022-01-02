@@ -135,8 +135,8 @@ class OcrDialog extends ComponentDialog {
                     // Wait for read recognition to complete
                     // result.status is initially undefined, since it's the result of read
                     while (result.status !== STATUS_SUCCEEDED) { await sleep(1000); result = await client.getReadResult(operation); }
-                    printedText = result.analyzeResult.readResults;
-                    console.log(printedText);
+                    return result.analyzeResult.readResults;
+                  
                      // Return the first page of result. Replace [0] with the desired page if this is a multi-page file such as .pdf or .tiff.
                   }
 
