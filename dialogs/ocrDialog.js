@@ -20,6 +20,7 @@ const computerVisionClient = new ComputerVisionClient(
 
 const axios = require('axios').default;
 const { v4: uuidv4 } = require('uuid');
+var textEdit = "";
 /**
  * AUTHENTICATE
  * This single client is used for all examples.
@@ -48,7 +49,7 @@ const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const OCR_DIALOG = 'OCR_DIALOG';
 const ATT_PROMPT = 'ATT_PROMPT';
 var value = null;
-var printedText;
+
 
 class OcrDialog extends ComponentDialog {
     constructor(userState) {
@@ -98,14 +99,16 @@ class OcrDialog extends ComponentDialog {
             }
         }
         downloadAttachmentAndWrite(value);
-        
-        computerVision();
+
+       
+        // var resultTemp = task.Result;
+        var resultTemp = await computerVision();
+        await sleep(10000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
+        await step.context.sendActivity(textEdit);
 }
 
     async ocrStep(step){
 
-        console.log("Sono quiiiiiiiiiiiii");
-        computerVision();
 
     }
 }
@@ -146,11 +149,16 @@ class OcrDialog extends ComponentDialog {
                       if (printedText.length > 1) {
                         console.log(`==== Page: ${page}`);
                       }
-                      const result = printedText[page];
+                        const result = printedText[page];
+                    
                       if (result.lines.length) {
                         for (const line of result.lines) {
-                          console.log(line.words.map(w => w.text).join(' '));
-                        }
+                            //console.log(line.words.map(w => w.text).join(' '));
+
+                            textEdit += line.words.map(w => w.text).join(' '); //appendo i caratteri letti nella variabile globale textedit
+
+                          }
+                         // flagOcr = true;
                       }
                       else { console.log('No recognized text.'); }
                     }
