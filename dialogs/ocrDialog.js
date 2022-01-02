@@ -29,8 +29,9 @@ const {
     Attachment
 } = require('botbuilder-dialogs');
 
+const { AttachmentClass }= require('./attachment.js');
+
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
-const TEXT_PROMPT = 'TEXT_PROMPT';
 const OCR_DIALOG = 'OCR_DIALOG';
 const ATT_PROMPT = 'ATT_PROMPT';
 
@@ -69,19 +70,16 @@ class OcrDialog extends ComponentDialog {
     }
 
     async ocrStep(step) {
-        
-        console.log("Sono qui");
-
-        const attachments = Attachment();
-
-        attachments = step.results.value;
-
-        console.log(attachments);
+        console.log(step.results);
+        console.log("sono qui");
+        const att = new AttachmentClass();
+        att.downloadAttachmentAndWrite(step);
     }
 
 }
+
 /*
-async handleIncomingAttachment(turnContext) {
+async function handleIncomingAttachment(turnContext) {
     // Prepare Promises to download each attachment and then execute each Promise.
     const promises = turnContext.activity.attachments.map(this.downloadAttachmentAndWrite);
     const successfulSaves = await Promise.all(promises);
@@ -104,7 +102,9 @@ async handleIncomingAttachment(turnContext) {
     const replyPromises = successfulSaves.map(replyForReceivedAttachments.bind(turnContext));
     await Promise.all(replyPromises);
 }
-async downloadAttachmentAndWrite(attachment) {
+
+
+async function downloadAttachmentAndWrite(attachment) {
     // Retrieve the attachment via the attachment's contentUrl.
     const url = attachment.contentUrl;
 
@@ -135,8 +135,7 @@ async downloadAttachmentAndWrite(attachment) {
         fileName: attachment.name,
         localPath: localFileName
     };
-}
-*/
 
+    */
 module.exports.OcrDialog =OcrDialog;
 module.exports.OCR_DIALOG = this.OCR_DIALOG;
