@@ -48,6 +48,7 @@ const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const OCR_DIALOG = 'OCR_DIALOG';
 const ATT_PROMPT = 'ATT_PROMPT';
 var value = null;
+var printedText;
 
 class OcrDialog extends ComponentDialog {
     constructor(userState) {
@@ -97,10 +98,14 @@ class OcrDialog extends ComponentDialog {
             }
         }
         downloadAttachmentAndWrite(value);
+        
+        computerVision();
 }
 
     async ocrStep(step){
 
+        console.log("Sono quiiiiiiiiiiiii");
+        computerVision();
 
     }
 }
@@ -112,7 +117,7 @@ class OcrDialog extends ComponentDialog {
                 const STATUS_SUCCEEDED = "succeeded";
                 const STATUS_FAILED = "failed"
 
-                 const localImagePath = __dirname + value.name ;//qui andrà il value.name dell'attachment
+                 const localImagePath = __dirname + '\\' + value.name ;//qui andrà il value.name dell'attachment
 
                  console.log('\Reading local image for text in ...', path.basename(localImagePath));
 
@@ -130,16 +135,18 @@ class OcrDialog extends ComponentDialog {
                     // Wait for read recognition to complete
                     // result.status is initially undefined, since it's the result of read
                     while (result.status !== STATUS_SUCCEEDED) { await sleep(1000); result = await client.getReadResult(operation); }
-                    return result.analyzeResult.readResults; // Return the first page of result. Replace [0] with the desired page if this is a multi-page file such as .pdf or .tiff.
+                    printedText = result.analyzeResult.readResults;
+                    console.log(printedText);
+                     // Return the first page of result. Replace [0] with the desired page if this is a multi-page file such as .pdf or .tiff.
                   }
 
-                  function printRecText(readResults) {
+                  function printRecText(printedText) {
                     console.log('Recognized text:');
-                    for (const page in readResults) {
-                      if (readResults.length > 1) {
+                    for (const page in printedText) {
+                      if (printedText.length > 1) {
                         console.log(`==== Page: ${page}`);
                       }
-                      const result = readResults[page];
+                      const result = printedText[page];
                       if (result.lines.length) {
                         for (const line of result.lines) {
                           console.log(line.words.map(w => w.text).join(' '));
@@ -162,7 +169,6 @@ class OcrDialog extends ComponentDialog {
     } 
 
  async function downloadAttachmentAndWrite(attachment) {
-    console.log("sono qui");
     // Retrieve the attachment via the attachment's contentUrl.
     const url = attachment.contentUrl;
 
