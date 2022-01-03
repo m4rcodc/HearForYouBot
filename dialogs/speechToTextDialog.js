@@ -11,7 +11,7 @@ const {
     CardFactory,
     ActivityHandler
 } = require('botbuilder');
-const { LuisRecognizer } = require('botbuilder-ai');
+
 const {
     TextPrompt,
     ComponentDialog,
@@ -26,7 +26,6 @@ const axios = require('axios').default;
 const { SimpleSpeechPhrase } = require('microsoft-cognitiveservices-speech-sdk/distrib/lib/src/common.speech/Exports');
 
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
-
 const ATT_PROMPT = 'ATT_PROMPT';
 const SPEECHTOTEXT_DIALOG = 'SPEECHTOTEXT_DIALOG'
 var value = null;
@@ -44,7 +43,7 @@ class SpeechToTextDialog extends ComponentDialog {
             this.speechToText.bind(this)
         ]));
 
-        this.initialDialogId = WATERFALL_DIALOG
+        this.initialDialogId = WATERFALL_DIALOG;
     }
 
     async run(turnContext, accessor) {

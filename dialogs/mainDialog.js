@@ -32,6 +32,11 @@ const {
     OcrDialog
 } = require('./ocrDialog.js');
 
+const {
+    TEXTTOSPEECH_DIALOG,
+    TextToSpeechDialog
+} = require('./textToSpeechDialog.js');
+
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const MAIN_DIALOG = 'MAIN_DIALOG'
 const TEXT_PROMPT = 'TEXT_PROMPT';
@@ -44,6 +49,7 @@ class MainDialog extends ComponentDialog {
         this.luisRecognizer = luisRecognizer;
         this.userState = userState;
         //Adding used dialogs
+        this.addDialog(new TextToSpeechDialog());
         this.addDialog(new OcrDialog());
         this.addDialog(new SpeechToTextDialog());
         this.addDialog(new TranslateDialog(luisRecognizer));
@@ -159,8 +165,8 @@ class MainDialog extends ComponentDialog {
             }
 
             else if(option === "Tradurre un file testuale in audio" || LuisRecognizer.topIntent(luisResult) === 'TestoAudio') {
-
-                await step.context.sendActivity("Testo in audio");
+                console.log("Vado nel dialogo che gestisce il TextToSpeech");
+                return await step.beginDialog("TEXTTOSPEECH_DIALOG");
             }
 
             else if(option === "Prendere testo da immagine" || LuisRecognizer.topIntent(luisResult) === 'TestoDaImmagine') {
