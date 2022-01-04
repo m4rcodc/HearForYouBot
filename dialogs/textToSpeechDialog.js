@@ -4,12 +4,12 @@ const fs = require('fs');
 const path = require('path');
 var subscriptionKey = "68befe3c7508400196b3472c4a12ac66";
 var serviceRegion = "westeurope";
-
-
+const sleep = require('util').promisify(setTimeout);
 const {
     ActionTypes,
     ActivityTypes,
     CardFactory,
+    MessageFactory,
     ActivityHandler
 } = require('botbuilder');
 const { LuisRecognizer } = require('botbuilder-ai');
@@ -122,27 +122,21 @@ class TextToSpeechDialog extends ComponentDialog {
 
     }
 
-    async getUploadedAttachment(step,turnContext) {
-        const audioData = fs.readFileSync(localAudioPath);
-        console.log("Sono qui");
-        const connectorFactory = turnContext.turnState.get(turnContext.adapter.ConnectorFactoryKey);
-        const connector = await connectorFactory.create(turnContext.activity.serviceUrl);
-        const conversationId = turnContext.activity.conversation.id;
-        const response = await connector.conversations.uploadAttachment(conversationId, {
-            name: 'fileaudio.wav',
-            originalBase64: audioData,
-            type: 'audio/wav'
-        });
+    async getUploadedAttachment(step) {
+        console.log("Sono in getuploadedattachment");
 
-        // Retrieve baseUri from ConnectorClient for... something.
-        const baseUri = connector.baseUri;
-        const attachmentUri = baseUri + (baseUri.endsWith('/') ? '' : '/') + `v3/attachments/${ encodeURI(response.id) }/views/original`;
-        return {
-            name: 'fileaudio.wav',
-            contentType: 'audio/wav',
-            contentUrl: attachmentUri
-        };
+        const card = CardFactory.audioCard("Your Audio", [localAudioPath]);
+        card.contentType = "audio/wav";
+
+        // const message = MessageFactory.attachment(card);
+
+        await sleep(3000);
+        console.log(card);
+        await step.context.sendActivity({ attachments: [card] });
+
     }
+
+   
 }
 /*
 async function syntethizeAudio(textToConvert){
