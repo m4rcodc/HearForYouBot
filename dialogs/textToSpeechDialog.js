@@ -124,7 +124,7 @@ class TextToSpeechDialog extends ComponentDialog {
 
     async getUploadedAttachment(step) {
         console.log("Sono in getuploadedattachment");
-
+        console.log("ciao");
         const card = CardFactory.audioCard("Your Audio", [localAudioPath]);
         card.contentType = "audio/wav";
 
