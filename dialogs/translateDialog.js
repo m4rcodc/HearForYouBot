@@ -38,7 +38,9 @@ class TranslateDialog extends ComponentDialog {
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.chiediLinguaStep.bind(this),
             this.optionLinguaStep.bind(this),
-            this.traduciTestoStep.bind(this)
+            this.traduciTestoStep.bind(this),
+            this.askforfinalStep.bind(this),
+            this.finalStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
@@ -62,7 +64,7 @@ class TranslateDialog extends ComponentDialog {
         };
 
         const buttons = [{
-                type: ActionTypes.PostBack,
+                type: ActionTypes.ImBack,
                 title: 'Italiano',
                 value: 'italiano'
             },
@@ -142,8 +144,6 @@ class TranslateDialog extends ComponentDialog {
         });
 
     }
-
-    
     
     async traduciTestoStep(step){
         
@@ -180,10 +180,63 @@ class TranslateDialog extends ComponentDialog {
             stringProva =string.substring(167,pos-20);
             
             await step.context.sendActivity(stringProva);
-        
+            
+
+            return await step.next();
         }
 
-        return await step.replaceDialog(this.id);
+    }
+
+    async askforfinalStep(step) {
+
+        const reply = {
+            type: ActivityTypes.Message
+        };
+
+
+        const text = "Posso fare altro per te?"
+        
+        await step.context.sendActivity(text);
+
+        const buttons = [{
+            type: ActionTypes.ImBack,
+            title: 'Si',
+            value: 'si'
+        },
+        {
+            type: ActionTypes.ImBack,
+            title: 'No',
+            value: 'no'
+        }];
+
+        const card = CardFactory.heroCard(
+            '',
+            undefined,
+            buttons
+        );
+
+        reply.attachments = [card];
+
+        await step.context.sendActivity(reply);
+            
+    }
+
+    async finalStep(step) {
+
+        console.log("Sono qui");
+        const option =  step.result;
+
+        if(option === "si"){
+
+            return await step.context.replaceDialog(this.id);
+
+        }
+
+        else {
+
+            return await step.endDialog(this.id);
+
+        }
     }
     
 }

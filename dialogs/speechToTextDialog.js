@@ -40,7 +40,8 @@ class SpeechToTextDialog extends ComponentDialog {
         this.addDialog(new AttachmentPrompt('ATT_PROMPT'));
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.introStep.bind(this),
-            this.speechToText.bind(this)
+            this.speechToText.bind(this),
+            this.finalStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
@@ -83,8 +84,13 @@ class SpeechToTextDialog extends ComponentDialog {
         await sleep(10000);
         await step.context.sendActivity(textStampato);
         
-    
 }
+
+            async finalStep(step) {
+
+            return await step.endDialog();
+        }
+
 }
 
     

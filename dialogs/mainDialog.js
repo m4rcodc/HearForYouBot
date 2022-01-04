@@ -116,17 +116,17 @@ class MainDialog extends ComponentDialog {
             {
                 type: ActionTypes.ImBack,
                 title: 'Genera un file testuale a partire da un file audio',
-                value: 'SpeechToText'
+                value: 'audio in testo'
             },
             {
                 type: ActionTypes.ImBack,
                 title: 'Genera un file audio a partire da un file testuale',
-                value: 'TextToSpeech'
+                value: 'text to audio'
             },
             {
                 type: ActionTypes.ImBack,
                 title: 'Ricava il testo da un immagine',
-                value: 'TextFromImage'
+                value: 'testo da immagine'
             }
         ];
 

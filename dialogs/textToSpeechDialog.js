@@ -44,7 +44,8 @@ class TextToSpeechDialog extends ComponentDialog {
             this.gestioneFileAudio.bind(this),
             this.introStep.bind(this),
             this.textToSpeechStep.bind(this),
-            this.getUploadedAttachment.bind(this)
+            this.getUploadedAttachment.bind(this),
+            this.finalStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
@@ -134,6 +135,13 @@ class TextToSpeechDialog extends ComponentDialog {
         console.log(card);
         await step.context.sendActivity({ attachments: [card] });
 
+
+
+    }
+
+    async finalStep(step) {
+
+        return await step.endDialog();
     }
 
    
