@@ -229,6 +229,7 @@ class TranslateDialog extends ComponentDialog {
         if(option === "si"){
 
             return await step.context.replaceDialog(this.id);
+            console.log("prova");
 
         }
 
