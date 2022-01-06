@@ -1,10 +1,16 @@
 var sdk = require("microsoft-cognitiveservices-speech-sdk");
 var readline = require("readline");
-const fs = require('fs');
+
 const path = require('path');
 var subscriptionKey = "68befe3c7508400196b3472c4a12ac66";
 var serviceRegion = "westeurope";
 const sleep = require('util').promisify(setTimeout);
+var fs = require('fs');
+const CloudConvert = require('cloudconvert');
+
+//const cloudconvert = new require('cloudconvert');
+
+
 const {
     ActionTypes,
     ActivityTypes,
@@ -88,8 +94,9 @@ class TextToSpeechDialog extends ComponentDialog {
 
     async textToSpeechStep(stepContext) {
          text = stepContext.result;
-         var prova = __dirname.substring(0,38);
-         localAudioPath = prova + '\\' + nomeFile;
+         
+        localAudioPath = "." + '\\' + nomeFile;
+        console.log(localAudioPath);
          var audioConfig = sdk.AudioConfig.fromAudioFileOutput(nomeFile);
          var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
      
@@ -123,16 +130,69 @@ class TextToSpeechDialog extends ComponentDialog {
 
     }
 
+    
+
     async getUploadedAttachment(step) {
         console.log("Sono in getuploadedattachment");
         console.log("ciao");
-        const card = CardFactory.audioCard("Your Audio", [localAudioPath]);
-        card.contentType = "audio/wav";
+        // const card = CardFactory.audioCard("Your Audio", [localAudioPath]);
+
+        const cloudConvert = new CloudConvert('eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiNzNmNjMyYzYzMzYyY2NlZTY4NDQxNTQ5MGI1OTRlZDRlOGI0ZWY1M2M1OThjZTZkZGEzNTZkYTM3N2I1YjEwNTgzMDY4ZWU0YjkzOGRmYjYiLCJpYXQiOjE2NDEzOTk2MDEuNjU1NDk1LCJuYmYiOjE2NDEzOTk2MDEuNjU1NDk5LCJleHAiOjQ3OTcwNzMyMDEuNjQyNjMxLCJzdWIiOiI1NTUzMDY4OCIsInNjb3BlcyI6WyJ1c2VyLnJlYWQiLCJ1c2VyLndyaXRlIiwidGFzay5yZWFkIiwidGFzay53cml0ZSIsIndlYmhvb2sucmVhZCIsIndlYmhvb2sud3JpdGUiLCJwcmVzZXQucmVhZCIsInByZXNldC53cml0ZSJdfQ.rfhv3pHP6ULx1lau_dQbpf46zBg54_OHSrlDe770SoFwa5Zwcmpen9R-n39V-7tzQnqXIDNZj8S8OFJT7aUXM65LI5RBA4P2e3vTIcd-3z0kJWjP6g_GVf4TC_iPgkwpsjjmSIfmWwRUodag7EjU5jubxsUfWFX11f45pSH_b4ok0CzAyOoR8jguDGHHZtpDIn5EZQyeBTh_Q4MwdYryJeuwP2jelwj75W2I0CFlAdmD3iV7kSEZUGtnoStDQRTjs-qV8o6Qt0RjPj2CBwMmWnrCJBrOyVnICpg4yGsjTlG5iYjXYAPNpB1EkV646i0BDQK3XE21YWX6W5xx9ch-SmjEz0YVF3UOm-Y2ZtxVisZ3312aqF4LkokMvW0sJ1jloJmBrKtzbjGWrGeShiCWxf14uE5ySHRB6hJxz7yJ-0bXQvzVO_MxHzHS4RIuaFLmJPmqUBgVZ20gVMWjbtNbAlUuZ-g98K_CSipltE4CNmRGSShGGzGDWgLW7ro4hF6uJkLNb4l_K1rXnavLMFli1Yw2ngtlfI7RHOzui_LW56VHQZHB_pWhCkcnzSb2uXCFqCjewAc-Eh94jEqmrT8NtVwr8KdLgS5fxdlFDHm8k8Y5lIImqThhY81RUIuf5YthcdHs2scPfNpMEuB58iw-Ex1nfJpfYDIixYOkcTUrrgk');
+        let job = await cloudConvert.jobs.create({
+            "tasks": {
+                "inputFile": {
+                    "operation": "import/upload"
+                },
+                "task-1": {
+                    "operation": "convert",
+                    "input": [
+                        "inputFile"
+                    ],
+                    "output_format": "mp3"
+                },
+                "export-1": {
+                    "operation": "export/url",
+                    "input": [],
+                    "inline": false,
+                    "archive_multiple_files": false
+                }
+            },
+            "tag": "jobbuilder"
+        });
+
+        const uploadTask = job.tasks.filter(task => task.name === 'inputFile')[0];
+
+        const inputFile = fs.createReadStream(localAudioPath);
+
+        
+        await cloudConvert.tasks.upload(uploadTask, inputFile, 'file.mp3');
+
+        console.log(job.result);
+
+
+        /*
+        let channelData = JSON.stringify({
+            "channelData": {
+                "method": "sendAudio",
+                "parameters": {
+                    "audio": {
+                        "url": "./passodallaluan.mp3",
+                        "mediaType": "audio/mp3",
+                    }
+                }
+            }
+        });
+    
+    */
+
+        const card = CardFactory.audioCard("Your Audio", [job.result]);
+        card.contentType = "audio/mp3";
 
         // const message = MessageFactory.attachment(card);
 
+
         await sleep(3000);
-        console.log(card);
+        // console.log(card);
         await step.context.sendActivity({ attachments: [card] });
 
 
