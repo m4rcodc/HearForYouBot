@@ -15,40 +15,59 @@ const restify = require('restify');
 // Import required bot services.
 // See https://aka.ms/bot-services to learn more about the different parts of a bot.
 const {
-    CloudAdapter,
-    ConfigurationServiceClientCredentialFactory,
     ConversationState,
-    createBotFrameworkAuthenticationFromConfiguration,
     InputHints,
     MemoryStorage,
-    UserState
+    UserState,
+    BotFrameworkAdapter
 } = require('botbuilder');
 
+//Import luis
 const { HearForYouRecognizer } = require('./dialogs/HearForYouRecognizer');
-
-// This bot's main dialog.
-const { DialogAndWelcomeBot } = require('./bots/dialogAndWelcomeBot');
+// Import bot
+const { DialogBot } = require('./bots/dialogBot');
+//Import main dialog
 const { MainDialog } = require('./dialogs/mainDialog');
 
 // the bot's booking dialog
 //const { BookingDialog } = require('./dialogs/bookingDialog');
 //const BOOKING_DIALOG = 'bookingDialog';
 
-const credentialsFactory = new ConfigurationServiceClientCredentialFactory({
-    MicrosoftAppId: process.env.MicrosoftAppId,
-    MicrosoftAppPassword: process.env.MicrosoftAppPassword,
-    MicrosoftAppType: process.env.MicrosoftAppType,
-    MicrosoftAppTenantId: process.env.MicrosoftAppTenantId
+// Create HTTP server
+const server = restify.createServer();
+server.use(restify.plugins.bodyParser());
+
+server.listen(process.env.port || process.env.PORT || 3978, function() {
+    console.log(`\n${ server.name } listening to ${ server.url }`);
+    console.log('\nGet Bot Framework Emulator: https://aka.ms/botframework-emulator');
+    console.log('\nTo talk to your bot, open the emulator select "Open Bot"');
 });
 
-const botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfiguration(null, credentialsFactory);
+// Create adapter
+// Update these values with the ones taken from Azure Bot Service
+const adapter = new BotFrameworkAdapter({
+    appId: process.env.MicrosoftAppId,
+    appPassword: process.env.MicrosoftAppPassword
+});
 
-// Create adapter.
-// See https://aka.ms/about-bot-adapter to learn more about adapters.
-const adapter = new CloudAdapter(botFrameworkAuthentication);
+// Create conversation and user state with in-memory storage provider
+const memoryStorage = new MemoryStorage();
+const conversationState = new ConversationState(memoryStorage);
+const userState = new UserState(memoryStorage);
+
+// If configured, pass in the FlightBookingRecognizer.  (Defining it externally allows it to be mocked for tests)
+const { LuisAppId, LuisAPIKey, LuisAPIHostName } = process.env;
+const luisConfig = { applicationId: LuisAppId, endpointKey: LuisAPIKey, endpoint: `https://${ LuisAPIHostName }` };
+
+const luisRecognizer = new HearForYouRecognizer(luisConfig);
+
+// Create the main dialog.
+const dialog = new MainDialog(luisRecognizer, userState);
+const bot = new DialogBot(conversationState, userState, dialog);
+
 
 // Catch-all for errors.
-const onTurnErrorHandler = async (context, error) => {
+adapter.onTurnError = async (context, error) => {
     // This check writes out errors to console log .vs. app insights.
     // NOTE: In production environment, you should consider logging this to Azure
     //       application insights. See https://aka.ms/bottelemetry for telemetry
@@ -72,45 +91,11 @@ const onTurnErrorHandler = async (context, error) => {
     await conversationState.delete(context);
 };
 
-// Set the onTurnError for the singleton CloudAdapter.
-adapter.onTurnError = onTurnErrorHandler;
-
-// Define a state store for your bot. See https://aka.ms/about-bot-state to learn more about using MemoryStorage.
-// A bot requires a state store to persist the dialog and user state between messages.
-
-// For local development, in-memory storage is used.
-// CAUTION: The Memory Storage used here is for local bot debugging only. When the bot
-// is restarted, anything stored in memory will be gone.
-const memoryStorage = new MemoryStorage();
-const conversationState = new ConversationState(memoryStorage);
-const userState = new UserState(memoryStorage);
-
-// If configured, pass in the FlightBookingRecognizer.  (Defining it externally allows it to be mocked for tests)
-const { LuisAppId, LuisAPIKey, LuisAPIHostName } = process.env;
-const luisConfig = { applicationId: LuisAppId, endpointKey: LuisAPIKey, endpoint: `https://${ LuisAPIHostName }` };
-
-const luisRecognizer = new HearForYouRecognizer(luisConfig);
-
-// Create the main dialog.
-const dialog = new MainDialog(luisRecognizer, userState);
-const bot = new DialogAndWelcomeBot(conversationState, userState, dialog);
-
-// Create HTTP server
-const server = restify.createServer();
-server.use(restify.plugins.bodyParser());
-
-server.listen(process.env.port || process.env.PORT || 3978, function() {
-    console.log(`\n${ server.name } listening to ${ server.url }`);
-    console.log('\nGet Bot Framework Emulator: https://aka.ms/botframework-emulator');
-    console.log('\nTo talk to your bot, open the emulator select "Open Bot"');
-});
-
 // Listen for incoming activities and route them to your bot main dialog.
 server.post('/api/messages', async (req, res) => {
     // Route received a request to adapter for processing
     await adapter.process(req, res, (context) => bot.run(context));
 });
-
 /*
 // Listen for Upgrade requests for Streaming.
 server.on('upgrade', async (req, socket, head) => {

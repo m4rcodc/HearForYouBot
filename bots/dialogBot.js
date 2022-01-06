@@ -1,4 +1,6 @@
 const { ActivityHandler } = require('botbuilder');
+const { CardFactory } = require('botbuilder');
+const WelcomeCard = require('./resources/welcomeCard.json');
 
 class DialogBot extends ActivityHandler {
     /**
@@ -17,6 +19,20 @@ class DialogBot extends ActivityHandler {
         this.userState = userState;
         this.dialog = dialog;
         this.dialogState = this.conversationState.createProperty('DialogState');
+
+        this.onMembersAdded(async (context, next) => {
+            const membersAdded = context.activity.membersAdded;
+            for (let cnt = 0; cnt < membersAdded.length; cnt++) {
+                if (membersAdded[cnt].id !== context.activity.recipient.id) {
+                    const welcomeCard = CardFactory.adaptiveCard(WelcomeCard);
+                    await context.sendActivity({ attachments: [welcomeCard] });
+                    await dialog.run(context, this.dialogState);
+                }
+            }
+
+            // By calling next() you ensure that the next BotHandler is run.
+            await next();
+        });
 
         this.onMessage(async (context, next) => {
             console.log('Running dialog with Message Activity.');

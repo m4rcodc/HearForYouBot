@@ -39,8 +39,8 @@ class TranslateDialog extends ComponentDialog {
             this.chiediLinguaStep.bind(this),
             this.optionLinguaStep.bind(this),
             this.traduciTestoStep.bind(this),
-            this.askforfinalStep.bind(this),
-            this.finalStep.bind(this)
+            //this.askforfinalStep.bind(this),
+            //this.finalStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
@@ -148,6 +148,7 @@ class TranslateDialog extends ComponentDialog {
     async traduciTestoStep(step){
         
         const option = step.result;
+        console.log(option);
         var prova = null;
 
         var axiosOptions = {
@@ -182,11 +183,11 @@ class TranslateDialog extends ComponentDialog {
             await step.context.sendActivity(stringProva);
             
 
-            return await step.next();
+            //return await step.next();
         }
 
     }
-
+/*
     async askforfinalStep(step) {
 
         const reply = {
@@ -238,6 +239,7 @@ class TranslateDialog extends ComponentDialog {
 
         }
     }
+    */
     
 }
 
