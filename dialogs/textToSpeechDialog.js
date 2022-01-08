@@ -46,7 +46,8 @@ const TEXT_PROMPT = 'TEXT_PROMPT';
 var text = null;
 var nomeFile = '';
 var localAudioPath = '';
-
+var localPath = '';
+var localName = '';
 
 class TextToSpeechDialog extends ComponentDialog {
     constructor(userState) {
@@ -104,7 +105,7 @@ class TextToSpeechDialog extends ComponentDialog {
         text = step.result;
         let message = {};
         
-        const { dir, audioName} = await syntethizeAudio(text,)
+        const {audioName} = await syntethizeAudio(text,step)
         
         message = {
 
@@ -121,57 +122,19 @@ class TextToSpeechDialog extends ComponentDialog {
         };
 
         await step.context.sendActivity(message);
-
-
-        /*localAudioPath = "." + '\\' + nomeFile;
-        console.log(localAudioPath);
-         var audioConfig = sdk.AudioConfig.fromAudioFileOutput(path.join(__dirname.replace('dialog','bot'),'/audio/',nomeFile),
-         );
-         var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-     
-        const dir = path.join(__dirname.replace('dialog','bot'),'/audio');
-
-         var synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
-     
-
-         synthesizer.speakSsmlAsync(
-             `<speak xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xmlns:emo="http://www.w3.org/2009/10/emotionml" version="1.0" xml:lang="en-US"><voice name="it-IT-IsabellaNeural"><mstts:express-as style="customerservice"><prosody rate="-10%" pitch="0%">
-                                         ${text}
-                                     </prosody>
-                                     </mstts:express-as>
-                                     </voice>
-                                     </speak>`,                                  
-             function (result) {
-                 if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-                   console.log("synthesis finished.");
-                 } else {
-                   console.error("Speech synthesis canceled, " + result.errorDetails +
-                       "\nDid you update the subscription info?");
-                 }
-                 synthesizer.close();
-                 synthesizer = undefined;
-               },
-     
-               function (err) {
-                 console.trace("err - " + err);
-                 synthesizer.close();
-                 synthesizer = undefined;
-               });
-
-               return await stepContext.next();
-*/
     }
 
 }
 
-       async function syntethizeAudio(text){
+       async function syntethizeAudio(text,step){
 
-        var audioConfig = sdk.AudioConfig.fromAudioFileOutput(path.join(__dirname.replace('dialogs','bots'),'/audio/', 'message.wav'),
-         );
+        var audioConfig = sdk.AudioConfig.fromAudioFileOutput(path.join(__dirname.replace('dialogs','bots'),'/audio/', 'message.wav'));
 
         var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
 
         var synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
+
+        step.context.sendActivity("sono qui");
 
         const dir = path.join(__dirname.replace('dialogs','bots'), '/audio/');
 
@@ -220,7 +183,7 @@ class TextToSpeechDialog extends ComponentDialog {
         }
 
         
-        const id = uuid();
+        //const id = uuid();
 
         await syn(text);
         
@@ -229,122 +192,12 @@ class TextToSpeechDialog extends ComponentDialog {
                         .format('mp3');
         await promisifyCommand(command,nomeFile)();
         //fs.unlink(path.join(dir,nomeFile), () => {}); metodo per rimuovere il file audio
-        var localPath = path.join(dir,nomeFile + '.mp3');
-        var localName = nomeFile + '.mp3';
-        return {localPath, localName};
+        localPath = path.join(dir,nomeFile + '.mp3');
+        localName = nomeFile + '.mp3';
+        fs.unlink(path.join(dir, 'message.wav'), () => {});
+        return {localName};
 
     }
-    
-    /*
-
-    async getUploadedAttachment(step) {
-        console.log("Sono in getuploadedattachment");
-        console.log("ciao");
-        // const card = CardFactory.audioCard("Your Audio", [localAudioPath]);
-
-        const cloudConvert = new CloudConvert('eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiNzNmNjMyYzYzMzYyY2NlZTY4NDQxNTQ5MGI1OTRlZDRlOGI0ZWY1M2M1OThjZTZkZGEzNTZkYTM3N2I1YjEwNTgzMDY4ZWU0YjkzOGRmYjYiLCJpYXQiOjE2NDEzOTk2MDEuNjU1NDk1LCJuYmYiOjE2NDEzOTk2MDEuNjU1NDk5LCJleHAiOjQ3OTcwNzMyMDEuNjQyNjMxLCJzdWIiOiI1NTUzMDY4OCIsInNjb3BlcyI6WyJ1c2VyLnJlYWQiLCJ1c2VyLndyaXRlIiwidGFzay5yZWFkIiwidGFzay53cml0ZSIsIndlYmhvb2sucmVhZCIsIndlYmhvb2sud3JpdGUiLCJwcmVzZXQucmVhZCIsInByZXNldC53cml0ZSJdfQ.rfhv3pHP6ULx1lau_dQbpf46zBg54_OHSrlDe770SoFwa5Zwcmpen9R-n39V-7tzQnqXIDNZj8S8OFJT7aUXM65LI5RBA4P2e3vTIcd-3z0kJWjP6g_GVf4TC_iPgkwpsjjmSIfmWwRUodag7EjU5jubxsUfWFX11f45pSH_b4ok0CzAyOoR8jguDGHHZtpDIn5EZQyeBTh_Q4MwdYryJeuwP2jelwj75W2I0CFlAdmD3iV7kSEZUGtnoStDQRTjs-qV8o6Qt0RjPj2CBwMmWnrCJBrOyVnICpg4yGsjTlG5iYjXYAPNpB1EkV646i0BDQK3XE21YWX6W5xx9ch-SmjEz0YVF3UOm-Y2ZtxVisZ3312aqF4LkokMvW0sJ1jloJmBrKtzbjGWrGeShiCWxf14uE5ySHRB6hJxz7yJ-0bXQvzVO_MxHzHS4RIuaFLmJPmqUBgVZ20gVMWjbtNbAlUuZ-g98K_CSipltE4CNmRGSShGGzGDWgLW7ro4hF6uJkLNb4l_K1rXnavLMFli1Yw2ngtlfI7RHOzui_LW56VHQZHB_pWhCkcnzSb2uXCFqCjewAc-Eh94jEqmrT8NtVwr8KdLgS5fxdlFDHm8k8Y5lIImqThhY81RUIuf5YthcdHs2scPfNpMEuB58iw-Ex1nfJpfYDIixYOkcTUrrgk');
-        let job = await cloudConvert.jobs.create({
-            "tasks": {
-                "inputFile": {
-                    "operation": "import/upload"
-                },
-                "task-1": {
-                    "operation": "convert",
-                    "input": [
-                        "inputFile"
-                    ],
-                    "output_format": "mp3"
-                },
-                "export-1": {
-                    "operation": "export/url",
-                    "input": [],
-                    "inline": false,
-                    "archive_multiple_files": false
-                }
-            },
-            "tag": "jobbuilder"
-        });
-
-        const uploadTask = job.tasks.filter(task => task.name === 'inputFile')[0];
-
-        const inputFile = fs.createReadStream(localAudioPath);
-
-        
-        await cloudConvert.tasks.upload(uploadTask, inputFile, 'file.mp3');
-
-        console.log(job.result);
-
-
-        /*
-        let channelData = JSON.stringify({
-            "channelData": {
-                "method": "sendAudio",
-                "parameters": {
-                    "audio": {
-                        "url": "./passodallaluan.mp3",
-                        "mediaType": "audio/mp3",
-                    }
-                }
-            }
-        });
-    
-    */
-/*
-        const card = CardFactory.audioCard("Your Audio", [job.result]);
-        card.contentType = "audio/mp3";
-
-        // const message = MessageFactory.attachment(card);
-
-
-        await sleep(3000);
-        // console.log(card);
-        await step.context.sendActivity({ attachments: [card] });
-
-
-
-    }
-
-    async finalStep(step) {
-
-        return await step.endDialog();
-    }
-
-   
-}
-/*
-async function syntethizeAudio(textToConvert){
-
-    const localFileAudioPath = __dirname + '\\' + filename ;
-    var audioConfig = sdk.AudioConfig.fromAudioFileOutput(filename);
-    var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-
-    var synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
-
-    synthesizer.speakSsmlAsync(
-        `<speak xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xmlns:emo="http://www.w3.org/2009/10/emotionml" version="1.0" xml:lang="en-US"><voice name="it-IT-IsabellaNeural"><mstts:express-as style="customerservice"><prosody rate="-10%" pitch="0%">
-                                    ${textToConvert}
-                                </prosody>
-                                </mstts:express-as>
-                                </voice>
-                                </speak>`,                                  
-        function (result) {
-            if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-              console.log("synthesis finished.");
-            } else {
-              console.error("Speech synthesis canceled, " + result.errorDetails +
-                  "\nDid you update the subscription info?");
-            }
-            synthesizer.close();
-            synthesizer = undefined;
-          },
-
-          function (err) {
-            console.trace("err - " + err);
-            synthesizer.close();
-            synthesizer = undefined;
-          });
-    }
-*/
 
 module.exports.TextToSpeechDialog = TextToSpeechDialog;
 module.exports.TEXTTOSPEECH_DIALOG = TEXTTOSPEECH_DIALOG;
