@@ -33,6 +33,7 @@ const {
     TextPrompt,
     ThisMemoryScope
 } = require('botbuilder-dialogs');
+const { ActivityReceivedEventArgs } = require("microsoft-cognitiveservices-speech-sdk");
 
 
 
@@ -88,7 +89,6 @@ class TextToSpeechDialog extends ComponentDialog {
     async gestioneFileAudio(stepContext) {
 
              nomeFile = stepContext.result;
-             nomeFile += '.wav';
              return await stepContext.next();
 
     }
@@ -103,12 +103,13 @@ class TextToSpeechDialog extends ComponentDialog {
     async textToSpeechStep(step) {
         text = step.result;
         let message = {};
-        const { dir, audioName} = await syntethizeAudio(text,);
-
+        
+        const { dir, audioName} = await syntethizeAudio(text,)
+        
         message = {
 
             text: 'Eccoti il tuo audio',
-            "channelData" : [
+            "channelDat" : [
                 {
                     method: 'sendVoice',
                     parameters: {
@@ -214,7 +215,7 @@ class TextToSpeechDialog extends ComponentDialog {
                 .on('error', (err) => {
                     cb(err);
                 })
-                .save(path.join(dir,id + '.ogg'));
+                .save(path.join(dir,id + '.mp3'));
             });
         }
 
@@ -224,12 +225,12 @@ class TextToSpeechDialog extends ComponentDialog {
         await syn(text);
         
         const command = ffmpeg(path.join(dir,'message.wav'))
-                        .outputOptions('-acodec libopus')
-                        .format('ogg');
-        await promisifyCommand(command,id)();
+                        .outputOptions('-acodec libmp3lame')
+                        .format('mp3');
+        await promisifyCommand(command,nomeFile)();
         //fs.unlink(path.join(dir,nomeFile), () => {}); metodo per rimuovere il file audio
-        var localPath = path.join(dir,id + '.ogg');
-        var localName = id + '.ogg';
+        var localPath = path.join(dir,nomeFile + '.mp3');
+        var localName = nomeFile + '.mp3';
         return {localPath, localName};
 
     }
