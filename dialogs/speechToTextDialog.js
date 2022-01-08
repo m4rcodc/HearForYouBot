@@ -1,9 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
-const speechConfig = sdk.SpeechConfig.fromSubscription("68befe3c7508400196b3472c4a12ac66", "westeurope");
+//const speechConfig = sdk.SpeechConfig.fromSubscription("68befe3c7508400196b3472c4a12ac66", "westeurope");
 speechConfig.speechRecognitionLanguage = "it-IT";
 const sleep = require('util').promisify(setTimeout);
+var subscriptionKey = "68befe3c7508400196b3472c4a12ac66";
+var serviceRegion = "westeurope";
+
 
 const {
     ActionTypes,
@@ -24,6 +27,7 @@ const {
 
 const axios = require('axios').default;
 const { SimpleSpeechPhrase } = require('microsoft-cognitiveservices-speech-sdk/distrib/lib/src/common.speech/Exports');
+const { writeHeapSnapshot } = require('v8');
 
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const ATT_PROMPT = 'ATT_PROMPT';
@@ -68,14 +72,11 @@ class SpeechToTextDialog extends ComponentDialog {
     async speechToText(step) {
         
         const result = step.result;
-        console.log(result);
+        console.log(result[0]);
         const attach = Object.values(result);
-        console.log(attach);
         for (const key in attach) {
             if (attach.hasOwnProperty(key)) {
-                value = attach[key];
-                console.log(value.name);
-        
+                value = attach[key];        
             }
         }
 
@@ -93,13 +94,58 @@ class SpeechToTextDialog extends ComponentDialog {
 
 }
 
-    
- async function fromFile() {
+
+async function recognizeAudio(audio) {
+
+    const audioFile = await this.downloadAttachmentAndWrite(audio);
+
+    let result;
+
+    result = await fromFile()
+
+
+
+ async function fromFile(dir,name) {
+
+
+    let pushStream = sdk.AudioInputStream.createPushStream();
+
+    fs.createReadStream(path.join(dir,name)).on('data',function)
+
+
+
+
     const localAudioPath = __dirname + '\\' + value.name ;
-    let audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync(localAudioPath));
+    let audioConfig = sdk.AudioConfig.fromStreamInput(pushStream);
+    const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey,serviceRegion);
     let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
 
-    recognizer.recognizeOnceAsync(result => {
+
+    const recognize = () => {
+        return new Promise((resolve,reject) => {
+            recognizer.recognizeOnceAsync(
+                (result) => {
+
+                    if(result) resolve(result);
+                },
+                (err) => {
+                    if (err) reject(err);
+                },
+            );
+
+        });
+    };
+
+    return recognize;
+
+ }
+
+
+}
+
+
+        /*
+        recognizeOnceAsync(result => {
         switch (result.reason) {
             case sdk.ResultReason.RecognizedSpeech:
                 console.log(`RECOGNIZED: Text=${result.text}`);
@@ -140,7 +186,7 @@ class SpeechToTextDialog extends ComponentDialog {
                 return value && value.type === 'Buffer' ? Buffer.from(value.data) : value;
             });
         }*/
-        fs.writeFile(localFileName, response.data, (fsError) => {
+     /*   fs.writeFile(localFileName, response.data, (fsError) => {
             if (fsError) {
                 throw fsError;
             }
@@ -155,7 +201,7 @@ class SpeechToTextDialog extends ComponentDialog {
         fileName: attachment.name,
         localPath: localFileName
     };
-}
+    */
 
 module.exports.SpeechToTextDialog = SpeechToTextDialog;
 module.exports.SPEECHTOTEXT_DIALOG = this.SPEECHTOTEXT_DIALOG;

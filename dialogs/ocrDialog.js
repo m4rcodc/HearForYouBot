@@ -8,6 +8,14 @@ const createReadStream = require('fs').createReadStream
 const sleep = require('util').promisify(setTimeout);
 const ComputerVisionClient = require('@azure/cognitiveservices-computervision').ComputerVisionClient;
 const ApiKeyCredentials = require('@azure/ms-rest-js').ApiKeyCredentials;
+const TelegramBot = require('node-telegram-bot-api');
+
+const token = '5016576261:AAGSlXURwpLqmXOCV-zccYrykqk4mZ85Hak'
+
+const bot = new TelegramBot(token);
+
+
+
 /**
  * AUTHENTICATE
  * This single client is used for all examples.
@@ -61,7 +69,7 @@ class OcrDialog extends ComponentDialog {
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.introStep.bind(this),
             this.downloadAttachStep.bind(this),
-            this.finalStep.bind(this)
+            //this.finalStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG
@@ -94,27 +102,37 @@ class OcrDialog extends ComponentDialog {
         for (const key in attach) {
             if (attach.hasOwnProperty(key)) {
                 value = attach[key];
-                console.log(value.name);
         
             }
         }
+        var string = JSON.stringify(value.contentUrL,null,4);
+        var file_id = string.substring(39,75);
+
+        
+
+        //var file = context.bot.getFile()
+
         downloadAttachmentAndWrite(value);
-
-       
+     
         // var resultTemp = task.Result;
-        var resultTemp = await computerVision();
-        await sleep(1000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
-        await step.context.sendActivity(textEdit);
+        computerVision();
 
-        return await step.next();
+        await sleep(10000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
+       
+        return await step.context.sendActivity(textEdit);
+
+        //return await step.next();
 }
 
-            async finalStep(step) {
+           /* async finalStep(step) {
 
                 return await step.endDialog();
-            }
+            }*/
 
 }
+
+
+
     async function computerVision() {
         async.series([
           async function () {
@@ -210,6 +228,8 @@ class OcrDialog extends ComponentDialog {
         fileName: attachment.name,
         localPath: localFileName
     };
+
+
     
     }
 

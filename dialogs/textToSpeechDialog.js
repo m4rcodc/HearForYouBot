@@ -1,34 +1,42 @@
 var sdk = require("microsoft-cognitiveservices-speech-sdk");
 var readline = require("readline");
-
+const {v4: uuid} = require('uuid');
+const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
+const Bluebird = require('bluebird');
+//import * as Bluebird from 'bluebird';
 var subscriptionKey = "68befe3c7508400196b3472c4a12ac66";
 var serviceRegion = "westeurope";
 const sleep = require('util').promisify(setTimeout);
 var fs = require('fs');
-const CloudConvert = require('cloudconvert');
+
+const serverUrl = 'https://api.telegram.org/5016576261:AAGSlXURwpLqmXOCV-zccYrykqk4mZ85Hak';
 
 //const cloudconvert = new require('cloudconvert');
 
 
 const {
     ActionTypes,
-    ActivityTypes,
-    CardFactory,
-    MessageFactory,
-    ActivityHandler
+	CardFactory,
+	StatePropertyAccessor,
+	TurnContext,
+	UserState,
 } = require('botbuilder');
 const { LuisRecognizer } = require('botbuilder-ai');
 const {
-    TextPrompt,
     ComponentDialog,
-    DialogSet,
-    DialogTurnStatus,
-    WaterfallDialog,
+	DialogSet,
+	DialogState,
+	DialogTurnStatus,
+	WaterfallDialog,
+	WaterfallStepContext,
+    TextPrompt,
     ThisMemoryScope
 } = require('botbuilder-dialogs');
-const { ConsoleLoggingListener } = require("microsoft-cognitiveservices-speech-sdk/distrib/lib/src/common.browser/ConsoleLoggingListener");
-const { dirname } = require("path");
+
+
+
+ffmpeg.setFfmpegPath(path.join(__dirname.replace('dialogs', 'libs'), '/ffmpeg.exe'));
 
 const TEXTTOSPEECH_DIALOG = 'TEXTTOSPEECH_DIALOG';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
@@ -50,8 +58,8 @@ class TextToSpeechDialog extends ComponentDialog {
             this.gestioneFileAudio.bind(this),
             this.introStep.bind(this),
             this.textToSpeechStep.bind(this),
-            this.getUploadedAttachment.bind(this),
-            this.finalStep.bind(this)
+            //this.getUploadedAttachment.bind(this),
+            //this.finalStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
@@ -92,16 +100,39 @@ class TextToSpeechDialog extends ComponentDialog {
         });
     }
 
-    async textToSpeechStep(stepContext) {
-         text = stepContext.result;
-         
-        localAudioPath = "." + '\\' + nomeFile;
+    async textToSpeechStep(step) {
+        text = step.result;
+        let message = {};
+        const { dir, audioName} = await syntethizeAudio(text,);
+
+        message = {
+
+            text: 'Eccoti il tuo audio',
+            "channelData" : [
+                {
+                    method: 'sendVoice',
+                    parameters: {
+                         voice: `${serverUrl}/public/${audioName}`,
+                        //voice: `${process.env.SERVER_URL}/public/${audioName}`
+                    },
+                },
+            ],
+        };
+
+        await step.context.sendActivity(message);
+
+
+        /*localAudioPath = "." + '\\' + nomeFile;
         console.log(localAudioPath);
-         var audioConfig = sdk.AudioConfig.fromAudioFileOutput(nomeFile);
+         var audioConfig = sdk.AudioConfig.fromAudioFileOutput(path.join(__dirname.replace('dialog','bot'),'/audio/',nomeFile),
+         );
          var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
      
+        const dir = path.join(__dirname.replace('dialog','bot'),'/audio');
+
          var synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
      
+
          synthesizer.speakSsmlAsync(
              `<speak xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xmlns:emo="http://www.w3.org/2009/10/emotionml" version="1.0" xml:lang="en-US"><voice name="it-IT-IsabellaNeural"><mstts:express-as style="customerservice"><prosody rate="-10%" pitch="0%">
                                          ${text}
@@ -127,10 +158,83 @@ class TextToSpeechDialog extends ComponentDialog {
                });
 
                return await stepContext.next();
-
+*/
     }
 
+}
+
+       async function syntethizeAudio(text){
+
+        var audioConfig = sdk.AudioConfig.fromAudioFileOutput(path.join(__dirname.replace('dialogs','bots'),'/audio/', 'message.wav'),
+         );
+
+        var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+
+        var synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
+
+        const dir = path.join(__dirname.replace('dialogs','bots'), '/audio/');
+
+        console.log("Sono qui");
+        const syn = (text) => {
+             return new Promise((resolve,reject) => { 
+                    synthesizer.speakSsmlAsync(
+                        `<speak xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xmlns:emo="http://www.w3.org/2009/10/emotionml" version="1.0" xml:lang="en-US"><voice name="it-IT-IsabellaNeural"><mstts:express-as style="customerservice"><prosody rate="-10%" pitch="0%">
+                                                ${text}
+                                            </prosody>
+                                            </mstts:express-as>
+                                            </voice>
+                                            </speak>`,                                  
+                        (result) => {
+                            if (result) {
+                                resolve(result);    
+                            }
+                            synthesizer.close();
+                        
+                        },
+                            (err) => {
+                                if (err) {
+                                    reject(err);
+                            }
+                            
+                            synthesizer.close();
+                            },
+
+                      );
+
+                 });
+
+              };
+
+
+        function promisifyCommand(command,id) {
+            return Bluebird.Promise.promisify((cb) => {
+                command.on('end', () => {
+                    cb(null);
+                })
+                .on('error', (err) => {
+                    cb(err);
+                })
+                .save(path.join(dir,id + '.ogg'));
+            });
+        }
+
+        
+        const id = uuid();
+
+        await syn(text);
+        
+        const command = ffmpeg(path.join(dir,'message.wav'))
+                        .outputOptions('-acodec libopus')
+                        .format('ogg');
+        await promisifyCommand(command,id)();
+        //fs.unlink(path.join(dir,nomeFile), () => {}); metodo per rimuovere il file audio
+        var localPath = path.join(dir,id + '.ogg');
+        var localName = id + '.ogg';
+        return {localPath, localName};
+
+    }
     
+    /*
 
     async getUploadedAttachment(step) {
         console.log("Sono in getuploadedattachment");
@@ -184,7 +288,7 @@ class TextToSpeechDialog extends ComponentDialog {
         });
     
     */
-
+/*
         const card = CardFactory.audioCard("Your Audio", [job.result]);
         card.contentType = "audio/mp3";
 
