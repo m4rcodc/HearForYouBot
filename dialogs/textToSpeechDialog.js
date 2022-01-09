@@ -10,7 +10,7 @@ var serviceRegion = "westeurope";
 const sleep = require('util').promisify(setTimeout);
 var fs = require('fs');
 
-const serverUrl = 'https://api.telegram.org/5016576261:AAGSlXURwpLqmXOCV-zccYrykqk4mZ85Hak';
+const serverUrl = 'https://hearforyoubot.azurewebsites.net';
 
 //const cloudconvert = new require('cloudconvert');
 
@@ -48,7 +48,7 @@ var nomeFile = '';
 var localAudioPath = '';
 var localPath = '';
 var localName = '';
-
+var globalName = "";
 class TextToSpeechDialog extends ComponentDialog {
     constructor(userState) {
         super(TEXTTOSPEECH_DIALOG);
@@ -105,23 +105,31 @@ class TextToSpeechDialog extends ComponentDialog {
         text = step.result;
         let message = {};
         
-        const {audioName} = await syntethizeAudio(text,step)
-        
-        message = {
 
-            text: 'Eccoti il tuo audio',
-            "channelDat" : [
+        await syntethizeAudio(text, step); //la return di questo metodo non funziona, restituisce sempre undefined
+        step.context.sendActivity("after syntethize audio");
+      
+        // console.log("globalaudioname" + globalName);
+       // await sleep(10000);
+       // step.context.sendActivity(__dirname);
+        message = {
+            channelData : [
                 {
-                    method: 'sendVoice',
+                    method: 'sendAudio',
                     parameters: {
-                         voice: `${serverUrl}/public/${audioName}`,
+                        audio: 'https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_1MG.mp3',
                         //voice: `${process.env.SERVER_URL}/public/${audioName}`
+                        //test su file da internet
+                        //https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_1MG.mp3
                     },
                 },
             ],
         };
 
         await step.context.sendActivity(message);
+
+
+    
     }
 
 }
@@ -169,19 +177,19 @@ class TextToSpeechDialog extends ComponentDialog {
 
               };
 
-
-        function promisifyCommand(command,id) {
-            return Bluebird.Promise.promisify((cb) => {
-                command.on('end', () => {
-                    cb(null);
-                })
-                .on('error', (err) => {
-                    cb(err);
-                })
-                .save(path.join(dir,id + '.mp3'));
-            });
-        }
-
+/*
+           function promisifyCommand(command, name) {
+               return Bluebird.Promise.promisify((cb) => {
+                   command.on('end', () => {
+                       cb(null);
+                   })
+                       .on('error', (err) => {
+                           cb(err);
+                       })
+                       .save(path.join(dir, name + '.mp3'));
+               });
+           }
+*/
         
         //const id = uuid();
 
@@ -189,12 +197,20 @@ class TextToSpeechDialog extends ComponentDialog {
         
         const command = ffmpeg(path.join(dir,'message.wav'))
                         .outputOptions('-acodec libmp3lame')
-                        .format('mp3');
-        await promisifyCommand(command,nomeFile)();
+               .format('mp3');
+
+           step.context.sendActivity("after command");
+         //  await promisifyCommand(command, nomeFile)();
+
+           step.context.sendActivity("after promisifycommand");
+
         //fs.unlink(path.join(dir,nomeFile), () => {}); metodo per rimuovere il file audio
         localPath = path.join(dir,nomeFile + '.mp3');
         localName = nomeFile + '.mp3';
-        fs.unlink(path.join(dir, 'message.wav'), () => {});
+           fs.unlink(path.join(dir, 'message.wav'), () => { });
+
+           step.context.sendActivity("before return final");
+           globalName = localName;
         return {localName};
 
     }
