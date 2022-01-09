@@ -3,12 +3,13 @@ var readline = require("readline");
 const {v4: uuid} = require('uuid');
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
-const Bluebird = require('bluebird');
-//import * as Bluebird from 'bluebird';
 var subscriptionKey = "68befe3c7508400196b3472c4a12ac66";
 var serviceRegion = "westeurope";
 const sleep = require('util').promisify(setTimeout);
 var fs = require('fs');
+//var fileUrl = require('file-url');
+const FormData = require('form-data');
+const url = require('url');
 
 const serverUrl = 'https://hearforyoubot.azurewebsites.net';
 
@@ -43,12 +44,15 @@ const TEXTTOSPEECH_DIALOG = 'TEXTTOSPEECH_DIALOG';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const TEXT_PROMPT = 'TEXT_PROMPT';
 
+//Variabili globali
 var text = null;
 var nomeFile = '';
 var localAudioPath = '';
 var localPath = '';
 var localName = '';
 var globalName = "";
+var globalLocalPath = "";
+
 class TextToSpeechDialog extends ComponentDialog {
     constructor(userState) {
         super(TEXTTOSPEECH_DIALOG);
@@ -110,14 +114,21 @@ class TextToSpeechDialog extends ComponentDialog {
         step.context.sendActivity("after syntethize audio");
       
         // console.log("globalaudioname" + globalName);
-       // await sleep(10000);
+       await sleep(10000);
        // step.context.sendActivity(__dirname);
+        //var pathUrl = __dirname + "Ciao.mp3";
+        //      var urlFinal = serverUrl + "/" + globalLocalPath;
+
+       
+
+       
+
         message = {
             channelData : [
                 {
                     method: 'sendAudio',
                     parameters: {
-                        audio: 'https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_1MG.mp3',
+                        audio: globalLocalPath,
                         //voice: `${process.env.SERVER_URL}/public/${audioName}`
                         //test su file da internet
                         //https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_1MG.mp3
@@ -125,6 +136,11 @@ class TextToSpeechDialog extends ComponentDialog {
                 },
             ],
         };
+
+   //     fileUrl(globalLocalPath);
+
+
+       // console.log(urlFinal);
 
         await step.context.sendActivity(message);
 
@@ -177,40 +193,43 @@ class TextToSpeechDialog extends ComponentDialog {
 
               };
 
-/*
-           function promisifyCommand(command, name) {
-               return Bluebird.Promise.promisify((cb) => {
-                   command.on('end', () => {
-                       cb(null);
-                   })
-                       .on('error', (err) => {
-                           cb(err);
-                       })
-                       .save(path.join(dir, name + '.mp3'));
-               });
-           }
-*/
         
         //const id = uuid();
 
         await syn(text);
         
-        const command = ffmpeg(path.join(dir,'message.wav'))
-                        .outputOptions('-acodec libmp3lame')
-               .format('mp3');
+           const command = ffmpeg(path.join(dir, 'message.wav'))
+               .outputOptions('-acodec libmp3lame')
+               .format('mp3')
+               .on('end', function () {
+                   console.log("done")
+               })
+               .on('error', function (error) {
+                   console.log("error" + error.message);
+            })
+             .save(path.join(dir, nomeFile + '.mp3'));
 
            step.context.sendActivity("after command");
-         //  await promisifyCommand(command, nomeFile)();
+
+        //   fs.save((path.join(dir, nomeFile + '.mp3')));
+
+           console.log(dir + " " + nomeFile);
 
            step.context.sendActivity("after promisifycommand");
 
-        //fs.unlink(path.join(dir,nomeFile), () => {}); metodo per rimuovere il file audio
+        
         localPath = path.join(dir,nomeFile + '.mp3');
         localName = nomeFile + '.mp3';
-           fs.unlink(path.join(dir, 'message.wav'), () => { });
+       
+           
+        step.context.sendActivity("before return final");
 
-           step.context.sendActivity("before return final");
-           globalName = localName;
+        globalLocalPath = localPath;
+        globalName = localName;
+
+           step.context.sendActivity("Questo è il global local path " + globalLocalPath);
+           step.context.sendActivity("Questo è il global local name " + globalName);
+
         return {localName};
 
     }
