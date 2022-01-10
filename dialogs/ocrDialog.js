@@ -105,8 +105,8 @@ class OcrDialog extends ComponentDialog {
         
             }
         }
-        var string = JSON.stringify(value.contentUrL,null,4);
-        var file_id = string.substring(39,75);
+        //var string = JSON.stringify(value.contentUrL,null,4);
+        //var file_id = string.substring(39,75);
 
         
 
@@ -119,6 +119,8 @@ class OcrDialog extends ComponentDialog {
 
         await sleep(10000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
        
+        console.log(textEdit);
+
         return await step.context.sendActivity(textEdit);
 
         //return await step.next();
@@ -158,7 +160,7 @@ class OcrDialog extends ComponentDialog {
             
                     // Wait for read recognition to complete
                     // result.status is initially undefined, since it's the result of read
-                    while (result.status !== STATUS_SUCCEEDED) { await sleep(1000); result = await client.getReadResult(operation); }
+                    while (result.status !== STATUS_SUCCEEDED) { await sleep(10000); result = await client.getReadResult(operation); }
                     return result.analyzeResult.readResults;
                   
                      // Return the first page of result. Replace [0] with the desired page if this is a multi-page file such as .pdf or .tiff.
