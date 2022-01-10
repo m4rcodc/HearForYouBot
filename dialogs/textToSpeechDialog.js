@@ -11,7 +11,7 @@ var fs = require('fs');
 const FormData = require('form-data');
 const url = require('url');
 
-const serverUrl = 'https://hearforyoubot.azurewebsites.net';
+//const serverUrl = 'https://hearforyoubot.azurewebsites.net';
 
 //const cloudconvert = new require('cloudconvert');
 
@@ -35,7 +35,10 @@ const {
     ThisMemoryScope
 } = require('botbuilder-dialogs');
 const { ActivityReceivedEventArgs } = require("microsoft-cognitiveservices-speech-sdk");
-
+const { getEnvironmentData } = require("worker_threads");
+const {
+    BlobServiceClient
+} = require('@azure/storage-blob');
 
 
 ffmpeg.setFfmpegPath(path.join(__dirname.replace('dialogs', 'libs'), '/ffmpeg.exe'));
@@ -109,26 +112,50 @@ class TextToSpeechDialog extends ComponentDialog {
         text = step.result;
         let message = {};
         
-
-        await syntethizeAudio(text, step); //la return di questo metodo non funziona, restituisce sempre undefined
+        await syntethizeAudio(text,step); //la return di questo metodo non funziona, restituisce sempre undefined
         step.context.sendActivity("after syntethize audio");
       
+        const blobServiceClient = new BlobServiceClient(
+            'https://hearforyoustorage.blob.core.windows.net/?sv=2020-08-04&ss=bfqt&srt=sco&sp=rwdlacupitfx&se=2022-12-10T03:16:34Z&st=2022-01-10T19:16:34Z&spr=https&sig=yZh2v9l0IbVt8wE5jcteyrpnw5PKyME6mzDm8jHvvDQ%3D'          
+            );
+          
+            const containerName = 'public';
+            const containerClient = blobServiceClient.getContainerClient(containerName);
+            //const createContainerResponse = await containerClient.create();
+            const blockBlobClient = containerClient.getBlockBlobClient(globalName);
+
+
+            const blobOptions = {
+                blobHTTPHeaders: {
+                    blobContentType: 'audio/mp3'
+                }
+            };
+            
+            await sleep(5000);
+            await blockBlobClient.uploadFile(globalLocalPath,blobOptions);
+
+            console.log("Blob was uploaded successfully");
+
+            console.log('\nListing blobs...');
+
+            // List the blob(s) in the container.
+            for await (const blob of containerClient.listBlobsFlat()) {
+                    console.log('\t', blob.name);
+            }
+
+            console.log(globalName);
         // console.log("globalaudioname" + globalName);
        await sleep(10000);
        // step.context.sendActivity(__dirname);
         //var pathUrl = __dirname + "Ciao.mp3";
         //      var urlFinal = serverUrl + "/" + globalLocalPath;
 
-       
-
-       
-
         message = {
             channelData : [
                 {
                     method: 'sendAudio',
                     parameters: {
-                        audio: globalLocalPath,
+                        audio: `https://hearforyoustorage.blob.core.windows.net/public/${globalName}`
                         //voice: `${process.env.SERVER_URL}/public/${audioName}`
                         //test su file da internet
                         //https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_1MG.mp3
@@ -157,7 +184,7 @@ class TextToSpeechDialog extends ComponentDialog {
         var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
 
         var synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
-
+        
         step.context.sendActivity("sono qui");
 
         const dir = path.join(__dirname.replace('dialogs','bots'), '/audio/');
@@ -227,8 +254,8 @@ class TextToSpeechDialog extends ComponentDialog {
         globalLocalPath = localPath;
         globalName = localName;
 
-           step.context.sendActivity("Questo è il global local path " + globalLocalPath);
-           step.context.sendActivity("Questo è il global local name " + globalName);
+           step.context.sendActivity("Questo ï¿½ il global local path " + globalLocalPath);
+           step.context.sendActivity("Questo ï¿½ il global local name " + globalName);
 
         return {localName};
 
