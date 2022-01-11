@@ -1,13 +1,11 @@
 const fs = require('fs');
-const path = require('path');
 const http = require('https');
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
 var speechConfig = sdk.SpeechConfig.fromSubscription("68befe3c7508400196b3472c4a12ac66", "westeurope");
 speechConfig.speechRecognitionLanguage = 'it-IT';
 const sleep = require('util').promisify(setTimeout);
-var subscriptionKey = "68befe3c7508400196b3472c4a12ac66";
-var serviceRegion = "westeurope";
-//vers aggiornata
+
+
 const {
     ActionTypes,
     ActivityTypes,
@@ -69,25 +67,21 @@ class SpeechToTextDialog extends ComponentDialog {
     async speechToText(step) {
         
         const result = step.result;
-        //console.log(result[0]);
+       
         const attach = Object.values(result);
         for (const key in attach) {
             if (attach.hasOwnProperty(key)) {
                 value = attach[key];        
             }
         }
-        console.log(value);
-        console.log("sono qui");
 
         await recognizeAudio(value);
         await sleep(10000);
-        console.log("sono qui1");
-        await step.context.sendActivity(textStampato);
-        
+      
+        await step.context.sendActivity(textStampato);   
 }
 
             async finalStep(step) {
-
             return await step.endDialog();
         }
 
@@ -102,17 +96,9 @@ async function recognizeAudio(value) {
      
     console.log(pathAudio);
 
-
-
     await fromFile(pathAudio);
 
     async function fromFile(pathAudio) {
-
-        console.log("sonoqui");
-        console.log(pathAudio);
-        
-        console.log("sono quiiii");
-
 
         const file = fs.createWriteStream("audioSpeech.wav");
         const request = http.get(pathAudio, function (response) {
@@ -120,8 +106,7 @@ async function recognizeAudio(value) {
         });
     
         let audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync("audioSpeech.wav"));
-            console.log("s");
-       // let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+   
         let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
   
       
@@ -131,7 +116,6 @@ async function recognizeAudio(value) {
             case sdk.ResultReason.RecognizedSpeech:
                 console.log(`RECOGNIZED: Text=${result.text}`);
                 textStampato = result.text; 
-                console.log("sono quiiiiiiiiiiiiiiiiii");
                 recognizer.close();
                 break;
             case sdk.ResultReason.NoMatch:
@@ -154,40 +138,6 @@ async function recognizeAudio(value) {
 
 }
 
-/*
- async function downloadAttachmentAndWrite(attachment) {
-    // Retrieve the attachment via the attachment's contentUrl.
-    const url = attachment.contentUrl;
 
-    // Local file path for the bot to save the attachment.
-    const localFileName = path.join(__dirname.replace('dialogs','bots'),'/audio', attachment.name);
-
-    try {
-        // arraybuffer is necessary for images
-        const response = await axios.get(url, { responseType: 'arraybuffer' });
-        // If user uploads JSON file, this prevents it from being written as "{"type":"Buffer","data":[123,13,10,32,32,34,108..."
-        if (response.headers['content-type'] === 'application/json') {
-            response.data = JSON.parse(response.data, (key, value) => {
-                return value && value.type === 'Buffer' ? Buffer.from(value.data) : value;
-            });
-        }
-      fs.writeFile(localFileName, response.data, (fsError) => {
-            if (fsError) {
-                throw fsError;
-            }
-        });
-    } catch (error) {
-        console.error(error);
-        return undefined;
-    }
-    // If no error was thrown while writing to disk, return the attachment's name
-    // and localFilePath for the response back to the user.
-    return {
-        fileName: attachment.name,
-        localPath: localFileName
-    };
- }  
-
-*/
 module.exports.SpeechToTextDialog = SpeechToTextDialog;
 module.exports.SPEECHTOTEXT_DIALOG = this.SPEECHTOTEXT_DIALOG;

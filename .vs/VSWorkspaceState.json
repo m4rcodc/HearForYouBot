@@ -7,6 +7,6 @@
     "\\deploymentTemplates",
     "\\dialogs"
   ],
-  "SelectedNode": "\\dialogs\\translateDialog.js",
+  "SelectedNode": "\\dialogs\\speechToTextDialog.js",
   "PreviewInSolutionExplorer": false
 }

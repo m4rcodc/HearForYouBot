@@ -113,7 +113,7 @@ class TextToSpeechDialog extends ComponentDialog {
         let message = {};
         
         await syntethizeAudio(text,step); //la return di questo metodo non funziona, restituisce sempre undefined
-        step.context.sendActivity("after syntethize audio");
+       
       
         const blobServiceClient = new BlobServiceClient(
             'https://hearforyoustorage.blob.core.windows.net/?sv=2020-08-04&ss=bfqt&srt=sco&sp=rwdlacupitfx&se=2022-12-10T03:16:34Z&st=2022-01-10T19:16:34Z&spr=https&sig=yZh2v9l0IbVt8wE5jcteyrpnw5PKyME6mzDm8jHvvDQ%3D'          
@@ -144,12 +144,9 @@ class TextToSpeechDialog extends ComponentDialog {
           //          console.log('\t', blob.name);
             //}
 
-      //      console.log(globalName);
-        // console.log("globalaudioname" + globalName);
+    
        await sleep(6000);
-       // step.context.sendActivity(__dirname);
-        //var pathUrl = __dirname + "Ciao.mp3";
-        //      var urlFinal = serverUrl + "/" + globalLocalPath;
+      
 
         message = {
             channelData : [
@@ -158,22 +155,14 @@ class TextToSpeechDialog extends ComponentDialog {
                     parameters: {
                         audio: `https://hearforyoustorage.blob.core.windows.net/public/${globalName}`
                         //voice: `${process.env.SERVER_URL}/public/${audioName}`
-                        //test su file da internet
-                        //https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_1MG.mp3
+                        
                     },
                 },
             ],
         };
-
-   //     fileUrl(globalLocalPath);
-
-
-       // console.log(urlFinal);
-
         await step.context.sendActivity(message);
 
 
-    
     }
 
 }
@@ -186,11 +175,11 @@ class TextToSpeechDialog extends ComponentDialog {
 
         var synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
         
-        step.context.sendActivity("sono qui");
+       
 
         const dir = path.join(__dirname.replace('dialogs','bots'), '/audio/');
 
-        console.log("Sono qui");
+       
         const syn = (text) => {
              return new Promise((resolve,reject) => { 
                     synthesizer.speakSsmlAsync(
@@ -231,36 +220,18 @@ class TextToSpeechDialog extends ComponentDialog {
                .format('mp3')
                .on('end', function () {
                    console.log("done")
-                   step.context.sendActivity("Conversione effettuata!");
                })
                .on('error', function (error) {
                    console.log("error" + error.message);
-                   step.context.sendActivity("Conversione non effettuata!");
-                   step.context.sendActivity(error.message);
             })
              .save(path.join(dir, nomeFile + '.mp3'));
 
-           step.context.sendActivity("after command");
+        console.log(dir + " " + nomeFile);
 
-        //   fs.save((path.join(dir, nomeFile + '.mp3')));
-
-           console.log(dir + " " + nomeFile);
-
-           step.context.sendActivity("after promisifycommand");
-
-           await sleep(3000);
         localPath = path.join(dir,nomeFile + '.mp3');
         localName = nomeFile + '.mp3';
-       
-           
-        step.context.sendActivity("before return final");
-
         globalLocalPath = localPath;
         globalName = localName;
-
-           step.context.sendActivity("Questo e il global local path " + globalLocalPath);
-           step.context.sendActivity("Questo e il global local name " + globalName);
-
         return {localName};
 
     }

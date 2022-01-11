@@ -2,9 +2,8 @@
 
 const async = require('async');
 const fs = require('fs');
-const https = require('https');
+const http = require('https');
 const path = require("path");
-const createReadStream = require('fs').createReadStream
 const sleep = require('util').promisify(setTimeout);
 const ComputerVisionClient = require('@azure/cognitiveservices-computervision').ComputerVisionClient;
 const ApiKeyCredentials = require('@azure/ms-rest-js').ApiKeyCredentials;
@@ -99,11 +98,8 @@ class OcrDialog extends ComponentDialog {
             }
         }
 
-      //  downloadAttachmentAndWrite(value,step);
-        //versione aggiornata
-       
-        // var resultTemp = task.Result;
-        var resultTemp = await computerVision(value.contentUrl);
+    
+        await computerVision(value.contentUrl);
         await sleep(10000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
         await step.context.sendActivity(textEdit);
 }
@@ -175,40 +171,6 @@ class OcrDialog extends ComponentDialog {
           throw (err);
         });
     } 
-
-/*
- async function downloadAttachmentAndWrite(attachment,step) {
-    // Retrieve the attachment via the attachment's contentUrl.
-    const url = attachment.contentUrl;
-    
-    // Local file path for the bot to save the attachment.
-    const localFileName = path.join(__dirname, attachment.name);
-
-    try {
-        // arraybuffer is necessary for images
-        const response = await axios.get(url, { responseType: 'arraybuffer' });
-        // If user uploads JSON file, this prevents it from being written as "{"type":"Buffer","data":[123,13,10,32,32,34,108..."
-        if (response.headers['content-type'] === 'application/json') {
-            response.data = JSON.parse(response.data, (key, value) => {
-                return value && value.type === 'Buffer' ? Buffer.from(value.data) : value;
-            });
-        }
-        fs.writeFile(localFileName, response.data, (fsError) => {
-            if (fsError) {
-                throw fsError;
-            }
-        });
-    } catch (error) {
-        console.error(error);
-        return undefined;
-    }
-    // If no error was thrown while writing to disk, return the attachment's name
-    // and localFilePath for the response back to the user.
-    return {
-        fileName: attachment.name,
-        localPath: localFileName
-    };
-    */
 
 
 module.exports.OcrDialog =OcrDialog;
