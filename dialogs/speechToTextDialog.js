@@ -1,13 +1,13 @@
 const fs = require('fs');
 const path = require('path');
+const http = require('https');
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
-//const speechConfig = sdk.SpeechConfig.fromSubscription("68befe3c7508400196b3472c4a12ac66", "westeurope");
+var speechConfig = sdk.SpeechConfig.fromSubscription("68befe3c7508400196b3472c4a12ac66", "westeurope");
+speechConfig.speechRecognitionLanguage = 'it-IT';
 const sleep = require('util').promisify(setTimeout);
 var subscriptionKey = "68befe3c7508400196b3472c4a12ac66";
 var serviceRegion = "westeurope";
-
-
-
+//vers aggiornata
 const {
     ActionTypes,
     ActivityTypes,
@@ -21,14 +21,10 @@ const {
     DialogSet,
     DialogTurnStatus,
     WaterfallDialog,
-    ThisMemoryScope,
     AttachmentPrompt
 } = require('botbuilder-dialogs');
 
 const axios = require('axios').default;
-const { SimpleSpeechPhrase } = require('microsoft-cognitiveservices-speech-sdk/distrib/lib/src/common.speech/Exports');
-const { writeHeapSnapshot } = require('v8');
-const Bluebird = require('bluebird');
 
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const ATT_PROMPT = 'ATT_PROMPT';
@@ -80,11 +76,13 @@ class SpeechToTextDialog extends ComponentDialog {
                 value = attach[key];        
             }
         }
+        console.log(value);
+        console.log("sono qui");
 
-        const msg = await recognizeAudio(value);
-        console.log(msg);
+        await recognizeAudio(value);
         await sleep(10000);
-        await step.context.sendActivity(msg);
+        console.log("sono qui1");
+        await step.context.sendActivity(textStampato);
         
 }
 
@@ -98,78 +96,42 @@ class SpeechToTextDialog extends ComponentDialog {
 
 async function recognizeAudio(value) {
 
-    const audioFile = await downloadAttachmentAndWrite(value);
-    console.log(audioFile.fileName);
-    console.log(audioFile.localPath);
-    
+   
 
-    const dir = audioFile.localPath;
-
-    const name= value.name;
-
-    let result;
-    await sleep(10000);
-    result = await fromFile(dir);
-    //console.log(result);
-    await sleep(10000);
-    result = await result();
-    await sleep(10000);
-    console.log(result);
-    return result.text;
-    
-
- async function fromFile(dir) {
+    var pathAudio = value.contentUrl;
+     
+    console.log(pathAudio);
 
 
-    let pushStream = sdk.AudioInputStream.createPushStream();
 
-    fs.createReadStream(dir)
-    .on('data',function(arrayBuffer) {
-        pushStream.write(arrayBuffer.slice());
-    })
-    .on('end',function() {
-        pushStream.close();
-    });
+    await fromFile(pathAudio);
+
+    async function fromFile(pathAudio) {
+
+        console.log("sonoqui");
+        console.log(pathAudio);
+        
+        console.log("sono quiiii");
 
 
-    //const localAudioPath = __dirname + '\\' + value.name ;
-    let audioConfig = sdk.AudioConfig.fromStreamInput(pushStream);
-    const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey,serviceRegion);
-    let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
-    speechConfig.speechRecognitionLanguage = "it-IT";
-
-    console.log("sono qui");
-    const recognize = () => {
-        return new Promise((resolve,reject) => {
-            recognizer.recognizeOnceAsync(
-                (result) => {
-
-                    if(result) resolve(result);
-                },
-                (err) => {
-                    if (err){
-
-                     reject(err);
-                }
-                recognizer.close();
-                },
-            );
-
+        const file = fs.createWriteStream("audioSpeech.wav");
+        const request = http.get(pathAudio, function (response) {
+            response.pipe(file);
         });
-    };
+    
+        let audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync("audioSpeech.wav"));
+            console.log("s");
+       // let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+        let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+  
+      
 
-    return recognize;
-
- }
-}
-
-
-        /*
-        recognizeOnceAsync(result => {
+    recognizer.recognizeOnceAsync(result => {
         switch (result.reason) {
             case sdk.ResultReason.RecognizedSpeech:
                 console.log(`RECOGNIZED: Text=${result.text}`);
-                textStampato = result.text;
+                textStampato = result.text; 
+                console.log("sono quiiiiiiiiiiiiiiiiii");
                 recognizer.close();
                 break;
             case sdk.ResultReason.NoMatch:
@@ -189,7 +151,10 @@ async function recognizeAudio(value) {
         recognizer.close();
     });
 }
-*/
+
+}
+
+/*
  async function downloadAttachmentAndWrite(attachment) {
     // Retrieve the attachment via the attachment's contentUrl.
     const url = attachment.contentUrl;
@@ -223,5 +188,6 @@ async function recognizeAudio(value) {
     };
  }  
 
+*/
 module.exports.SpeechToTextDialog = SpeechToTextDialog;
 module.exports.SPEECHTOTEXT_DIALOG = this.SPEECHTOTEXT_DIALOG;

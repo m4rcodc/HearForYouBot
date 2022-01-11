@@ -1,8 +1,12 @@
 {
   "ExpandedNodes": [
     "",
+    "\\bots",
+    "\\cognitiveModels",
+    "\\deploymentScripts",
+    "\\deploymentTemplates",
     "\\dialogs"
   ],
-  "SelectedNode": "\\dialogs\\ocrDialog.js",
+  "SelectedNode": "\\dialogs\\translateDialog.js",
   "PreviewInSolutionExplorer": false
 }

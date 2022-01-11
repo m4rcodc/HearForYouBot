@@ -98,11 +98,12 @@ class OcrDialog extends ComponentDialog {
         
             }
         }
-        downloadAttachmentAndWrite(value,step);
 
+      //  downloadAttachmentAndWrite(value,step);
+        //versione aggiornata
        
         // var resultTemp = task.Result;
-        var resultTemp = await computerVision();
+        var resultTemp = await computerVision(value.contentUrl);
         await sleep(10000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
         await step.context.sendActivity(textEdit);
 }
@@ -112,7 +113,7 @@ class OcrDialog extends ComponentDialog {
 
     }
 }
-    async function computerVision() {
+    async function computerVision(contentUrl) {
         async.series([
           async function () {
                 // Status strings returned from Read API. NOTE: CASING IS SIGNIFICANT.
@@ -120,28 +121,27 @@ class OcrDialog extends ComponentDialog {
                 const STATUS_SUCCEEDED = "succeeded";
                 const STATUS_FAILED = "failed"
 
-                 const localImagePath = __dirname + '\\' + value.name ;//qui andrà il value.name dell'attachment
-
-                 console.log('\Reading local image for text in ...', path.basename(localImagePath));
+                const remoteImagePath = contentUrl;
 
 
-                 console.log('\nReadwritten text from local file...', localImagePath);
-                const writingResult = await readTextFromFile(computerVisionClient, localImagePath);
+                 console.log('\Reading local image for text in ...', path.basename(remoteImagePath));
+
+
+              
+                const writingResult = await readTextFromURL(computerVisionClient, remoteImagePath);
                 printRecText(writingResult);
 
-                async function readTextFromFile(client, localImagePath) {
+                async function readTextFromURL(client, url) {
                     // To recognize text in a local image, replace client.read() with readTextInStream() as shown:
-                    let result = await client.readInStream(() => createReadStream(localImagePath));
+                    let result = await client.read(url);
                     // Operation ID is last path segment of operationLocation (a URL)
                     let operation = result.operationLocation.split('/').slice(-1)[0];
-            
+
                     // Wait for read recognition to complete
                     // result.status is initially undefined, since it's the result of read
                     while (result.status !== STATUS_SUCCEEDED) { await sleep(1000); result = await client.getReadResult(operation); }
-                    return result.analyzeResult.readResults;
-                  
-                     // Return the first page of result. Replace [0] with the desired page if this is a multi-page file such as .pdf or .tiff.
-                  }
+                    return result.analyzeResult.readResults; // Return the first page of result. Replace [0] with the desired page if this is a multi-page file such as .pdf or .tiff.
+                }
 
                   function printRecText(printedText) {
                     console.log('Recognized text:');
@@ -176,10 +176,11 @@ class OcrDialog extends ComponentDialog {
         });
     } 
 
+/*
  async function downloadAttachmentAndWrite(attachment,step) {
     // Retrieve the attachment via the attachment's contentUrl.
     const url = attachment.contentUrl;
-
+    
     // Local file path for the bot to save the attachment.
     const localFileName = path.join(__dirname, attachment.name);
 
@@ -207,8 +208,8 @@ class OcrDialog extends ComponentDialog {
         fileName: attachment.name,
         localPath: localFileName
     };
-    
-    }
+    */
+
 
 module.exports.OcrDialog =OcrDialog;
 module.exports.OCR_DIALOG = this.OCR_DIALOG;
