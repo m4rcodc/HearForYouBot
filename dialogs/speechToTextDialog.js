@@ -6,6 +6,8 @@ const sleep = require('util').promisify(setTimeout);
 var subscriptionKey = "68befe3c7508400196b3472c4a12ac66";
 var serviceRegion = "westeurope";
 
+
+
 const {
     ActionTypes,
     ActivityTypes,
@@ -19,10 +21,14 @@ const {
     DialogSet,
     DialogTurnStatus,
     WaterfallDialog,
+    ThisMemoryScope,
     AttachmentPrompt
 } = require('botbuilder-dialogs');
 
 const axios = require('axios').default;
+const { SimpleSpeechPhrase } = require('microsoft-cognitiveservices-speech-sdk/distrib/lib/src/common.speech/Exports');
+const { writeHeapSnapshot } = require('v8');
+const Bluebird = require('bluebird');
 
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const ATT_PROMPT = 'ATT_PROMPT';
@@ -74,13 +80,11 @@ class SpeechToTextDialog extends ComponentDialog {
                 value = attach[key];        
             }
         }
-        console.log(value);
-        console.log("sono qui");
 
-        await recognizeAudio(value);
+        const msg = await recognizeAudio(value);
+        console.log(msg);
         await sleep(10000);
-        console.log("sono qui1");
-        await step.context.sendActivity(textStampato);
+        await step.context.sendActivity(msg);
         
 }
 
@@ -95,33 +99,77 @@ class SpeechToTextDialog extends ComponentDialog {
 async function recognizeAudio(value) {
 
     const audioFile = await downloadAttachmentAndWrite(value);
-
-	var pathAudio = audioFile.localPath;	
-     
-    console.log(pathAudio);
-
-    await fromFile(pathAudio);
-
-     async function fromFile(dir) {
-
-        console.log("sonoqui");
-        console.log(dir);
-        const speechConfig = sdk.SpeechConfig.fromSubscription(
-            subscriptionKey,
-            serviceRegion
-        );
-        console.log("sono quiiii");
+    console.log(audioFile.fileName);
+    console.log(audioFile.localPath);
     
-    let audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFile(dir));
-            console.log("s");
-    let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
 
-    recognizer.recognizeOnceAsync(result => {
+    const dir = audioFile.localPath;
+
+    const name= value.name;
+
+    let result;
+    await sleep(10000);
+    result = await fromFile(dir);
+    //console.log(result);
+    await sleep(10000);
+    result = await result();
+    await sleep(10000);
+    console.log(result);
+    return result.text;
+    
+
+ async function fromFile(dir) {
+
+
+    let pushStream = sdk.AudioInputStream.createPushStream();
+
+    fs.createReadStream(dir)
+    .on('data',function(arrayBuffer) {
+        pushStream.write(arrayBuffer.slice());
+    })
+    .on('end',function() {
+        pushStream.close();
+    });
+
+
+    //const localAudioPath = __dirname + '\\' + value.name ;
+    let audioConfig = sdk.AudioConfig.fromStreamInput(pushStream);
+    const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey,serviceRegion);
+    let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+    speechConfig.speechRecognitionLanguage = "it-IT";
+
+    console.log("sono qui");
+    const recognize = () => {
+        return new Promise((resolve,reject) => {
+            recognizer.recognizeOnceAsync(
+                (result) => {
+
+                    if(result) resolve(result);
+                },
+                (err) => {
+                    if (err){
+
+                     reject(err);
+                }
+                recognizer.close();
+                },
+            );
+
+        });
+    };
+
+    return recognize;
+
+ }
+}
+
+
+        /*
+        recognizeOnceAsync(result => {
         switch (result.reason) {
             case sdk.ResultReason.RecognizedSpeech:
                 console.log(`RECOGNIZED: Text=${result.text}`);
-                textStampato = result.text; 
-                console.log("sono quiiiiiiiiiiiiiiiiii");
+                textStampato = result.text;
                 recognizer.close();
                 break;
             case sdk.ResultReason.NoMatch:
@@ -141,9 +189,7 @@ async function recognizeAudio(value) {
         recognizer.close();
     });
 }
-
-}
-
+*/
  async function downloadAttachmentAndWrite(attachment) {
     // Retrieve the attachment via the attachment's contentUrl.
     const url = attachment.contentUrl;

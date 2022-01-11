@@ -27,15 +27,16 @@ class DialogBot extends ActivityHandler {
                     const reply = {
                         type: ActivityTypes.Message
                     };
-                    var card = CardFactory.thumbnailCard(
+                    var card = CardFactory.heroCard(
                         'Benvenuto, sono HearForYouBot!',
-                        [{
-                            url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtB3AwMUeNoq4gUBGe6Ocj8kyh3bXa9ZbV7u1fVKQoyKFHdkqU"
-                        }],
+                        
+                        'Sono a tua completa disposizione! Con questo bot potrai svolgere diverse funzionalità, tra cui quelle di SpeechToText per poter tradurre un file audio in testo e viceversa, di Translate per poter tradurre il testo in un \' altra lingua, di ComputerVision per poter estrarre del testo da un \'immagine a tua scelta',
+
+                        ["https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtB3AwMUeNoq4gUBGe6Ocj8kyh3bXa9ZbV7u1fVKQoyKFHdkqU"],
+
                         [],
-                        {
-                            text: 'Sono a tua completa disposizione! Con questo bot potrai svolgere diverse funzionalità, tra cui quelle di SpeechToText per poter tradurre un file audio in testo e viceversa, di Translate per poter tradurre il testo in un \' altra lingua, di ComputerVision per poter estrarre del testo da un \'immagine a tua scelta',
-                        }
+                
+                        
                     );
                     reply.attachments = [card];
                     await context.sendActivity(reply);

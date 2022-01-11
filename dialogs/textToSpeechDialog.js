@@ -41,7 +41,7 @@ const {
 } = require('@azure/storage-blob');
 
 
-ffmpeg.setFfmpegPath(path.join(__dirname.replace('dialogs', 'libs'), '/ffmpeg.exe'));
+ffmpeg.setFfmpegPath(path.join(__dirname.replace('dialogs', 'libs'), '/ffmpeg'));
 
 const TEXTTOSPEECH_DIALOG = 'TEXTTOSPEECH_DIALOG';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
@@ -131,21 +131,22 @@ class TextToSpeechDialog extends ComponentDialog {
                 }
             };
             
-            await sleep(5000);
-            await blockBlobClient.uploadFile(globalLocalPath,blobOptions);
+            
+            await blockBlobClient.uploadFile(globalLocalPath, blobOptions);
+           
 
             console.log("Blob was uploaded successfully");
 
             console.log('\nListing blobs...');
 
             // List the blob(s) in the container.
-            for await (const blob of containerClient.listBlobsFlat()) {
-                    console.log('\t', blob.name);
-            }
+        //    for await (const blob of containerClient.listBlobsFlat()) {
+          //          console.log('\t', blob.name);
+            //}
 
-            console.log(globalName);
+      //      console.log(globalName);
         // console.log("globalaudioname" + globalName);
-       await sleep(10000);
+       await sleep(6000);
        // step.context.sendActivity(__dirname);
         //var pathUrl = __dirname + "Ciao.mp3";
         //      var urlFinal = serverUrl + "/" + globalLocalPath;
@@ -230,9 +231,12 @@ class TextToSpeechDialog extends ComponentDialog {
                .format('mp3')
                .on('end', function () {
                    console.log("done")
+                   step.context.sendActivity("Conversione effettuata!");
                })
                .on('error', function (error) {
                    console.log("error" + error.message);
+                   step.context.sendActivity("Conversione non effettuata!");
+                   step.context.sendActivity(error.message);
             })
              .save(path.join(dir, nomeFile + '.mp3'));
 
@@ -244,7 +248,7 @@ class TextToSpeechDialog extends ComponentDialog {
 
            step.context.sendActivity("after promisifycommand");
 
-        
+           await sleep(3000);
         localPath = path.join(dir,nomeFile + '.mp3');
         localName = nomeFile + '.mp3';
        
@@ -254,8 +258,8 @@ class TextToSpeechDialog extends ComponentDialog {
         globalLocalPath = localPath;
         globalName = localName;
 
-           step.context.sendActivity("Questo � il global local path " + globalLocalPath);
-           step.context.sendActivity("Questo � il global local name " + globalName);
+           step.context.sendActivity("Questo e il global local path " + globalLocalPath);
+           step.context.sendActivity("Questo e il global local name " + globalName);
 
         return {localName};
 
