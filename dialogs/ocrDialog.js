@@ -98,9 +98,14 @@ class OcrDialog extends ComponentDialog {
             }
         }
 
-    
+
         await computerVision(value.contentUrl);
-        await sleep(10000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
+        
+        promise.then(function (val) {
+            console.log(val);
+        });
+
+        //await sleep(10000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
         await step.context.sendActivity(textEdit);
 }
 
@@ -119,6 +124,7 @@ class OcrDialog extends ComponentDialog {
 
                 const remoteImagePath = contentUrl;
 
+                textEdit = '';
 
                  console.log('\Reading local image for text in ...', path.basename(remoteImagePath));
 
@@ -126,6 +132,7 @@ class OcrDialog extends ComponentDialog {
               
                 const writingResult = await readTextFromURL(computerVisionClient, remoteImagePath);
                 printRecText(writingResult);
+
 
                 async function readTextFromURL(client, url) {
                     // To recognize text in a local image, replace client.read() with readTextInStream() as shown:
@@ -164,7 +171,8 @@ class OcrDialog extends ComponentDialog {
         }, 
         function () {
             return new Promise((resolve) => {
-              resolve();
+                
+                resolve();
             })
           }
         ], (err) => {

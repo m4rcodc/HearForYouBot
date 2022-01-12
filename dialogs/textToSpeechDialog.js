@@ -6,14 +6,12 @@ const path = require('path');
 var subscriptionKey = "68befe3c7508400196b3472c4a12ac66";
 var serviceRegion = "westeurope";
 const sleep = require('util').promisify(setTimeout);
+const Bluebird = require('bluebird');
 var fs = require('fs');
-//var fileUrl = require('file-url');
-const FormData = require('form-data');
-const url = require('url');
 
 //const serverUrl = 'https://hearforyoubot.azurewebsites.net';
 
-//const cloudconvert = new require('cloudconvert');
+
 
 
 const {
@@ -50,9 +48,6 @@ const TEXT_PROMPT = 'TEXT_PROMPT';
 //Variabili globali
 var text = null;
 var nomeFile = '';
-var localAudioPath = '';
-var localPath = '';
-var localName = '';
 var globalName = "";
 var globalLocalPath = "";
 
@@ -139,15 +134,6 @@ class TextToSpeechDialog extends ComponentDialog {
 
             console.log('\nListing blobs...');
 
-            // List the blob(s) in the container.
-        //    for await (const blob of containerClient.listBlobsFlat()) {
-          //          console.log('\t', blob.name);
-            //}
-
-    
-       await sleep(6000);
-      
-
         message = {
             channelData : [
                 {
@@ -213,26 +199,42 @@ class TextToSpeechDialog extends ComponentDialog {
         
         //const id = uuid();
 
+           function promisifyCommand(command) {
+               return Bluebird.Promise.promisify((cb) => {
+                   command
+                       .on('end', () => {
+                           cb(null);
+                       })
+                       .on('error', (err) => {
+                           cb(err);
+                       })
+                       .save(path.join(dir, nomeFile + '.mp3'));
+               });
+           }
+
+
         await syn(text);
-        
+
+
            const command = ffmpeg(path.join(dir, 'message.wav'))
                .outputOptions('-acodec libmp3lame')
-               .format('mp3')
-               .on('end', function () {
-                   console.log("done")
-               })
-               .on('error', function (error) {
-                   console.log("error" + error.message);
-            })
-             .save(path.join(dir, nomeFile + '.mp3'));
+               .format('mp3');
+              
+           await promisifyCommand(command)();
 
-        console.log(dir + " " + nomeFile);
+       
+           console.log(dir + " " + nomeFile);
 
-        localPath = path.join(dir,nomeFile + '.mp3');
-        localName = nomeFile + '.mp3';
-        globalLocalPath = localPath;
-        globalName = localName;
-        return {localName};
+
+           const localPath = path.join(dir, nomeFile + '.mp3');
+
+           const localName = nomeFile + '.mp3';
+
+           globalLocalPath = localPath;
+
+           globalName = localName;
+
+     
 
     }
 

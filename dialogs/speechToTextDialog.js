@@ -28,7 +28,6 @@ const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const ATT_PROMPT = 'ATT_PROMPT';
 const SPEECHTOTEXT_DIALOG = 'SPEECHTOTEXT_DIALOG'
 var value = null;
-var textStampato = null;
 
 
 class SpeechToTextDialog extends ComponentDialog {
@@ -75,10 +74,10 @@ class SpeechToTextDialog extends ComponentDialog {
             }
         }
 
-        await recognizeAudio(value);
-        await sleep(10000);
+       const message = await recognizeAudio(value);
+        
       
-        await step.context.sendActivity(textStampato);   
+        await step.context.sendActivity(message);   
 }
 
             async finalStep(step) {
@@ -90,13 +89,18 @@ class SpeechToTextDialog extends ComponentDialog {
 
 async function recognizeAudio(value) {
 
-   
+    let result;
+    
+
 
     var pathAudio = value.contentUrl;
      
     console.log(pathAudio);
 
-    await fromFile(pathAudio);
+    result = await fromFile(pathAudio);
+    result = await result();
+
+    return result.text;
 
     async function fromFile(pathAudio) {
 
@@ -104,14 +108,31 @@ async function recognizeAudio(value) {
         const request = http.get(pathAudio, function (response) {
             response.pipe(file);
         });
-    
-        let audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync("audioSpeech.wav"));
-   
-        let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
-  
-      
 
-    recognizer.recognizeOnceAsync(result => {
+        let audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync("audioSpeech.wav"));
+
+        let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+
+
+
+        const recognize = () => {
+            return new Promise((resolve, reject) => {
+                recognizer.recognizeOnceAsync(
+                    (result) => {
+                        if (result) resolve(result);
+                    },
+                    (err) => {
+                        if (err) reject(err);
+                    },
+                );
+            });
+        };
+
+        return recognize;
+    }
+    
+
+/*
         switch (result.reason) {
             case sdk.ResultReason.RecognizedSpeech:
                 console.log(`RECOGNIZED: Text=${result.text}`);
@@ -133,8 +154,10 @@ async function recognizeAudio(value) {
                 break;
         }
         recognizer.close();
-    });
-}
+
+*/
+    
+
 
 }
 

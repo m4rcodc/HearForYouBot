@@ -110,7 +110,7 @@ class TranslateDialog extends ComponentDialog {
         const lingua = step.result;
         console.log(lingua);
 
-        console.log("SonoQui1");
+   
         const luisResult = await this.luisRecognizer.executeLuisQuery(step.context);
 
         if(lingua === "Inglese" || LuisRecognizer.topIntent(luisResult) === 'LinguaInglese' ) {
@@ -187,59 +187,7 @@ class TranslateDialog extends ComponentDialog {
         }
 
     }
-/*
-    async askforfinalStep(step) {
 
-        const reply = {
-            type: ActivityTypes.Message
-        };
-
-
-        const text = "Posso fare altro per te?"
-        
-        await step.context.sendActivity(text);
-
-        const buttons = [{
-            type: ActionTypes.ImBack,
-            title: 'Si',
-            value: 'si'
-        },
-        {
-            type: ActionTypes.ImBack,
-            title: 'No',
-            value: 'no'
-        }];
-
-        const card = CardFactory.heroCard(
-            '',
-            undefined,
-            buttons
-        );
-
-        reply.attachments = [card];
-
-        await step.context.sendActivity(reply);
-            
-    }
-
-    async finalStep(step) {
-
-        console.log("Sono qui");
-        const option =  step.result;
-
-        if(option === "si"){
-
-            return await step.context.replaceDialog(this.id);
-
-        }
-
-        else {
-
-            return await step.endDialog(this.id);
-
-        }
-    }
-    */
     
 }
 
