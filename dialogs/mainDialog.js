@@ -84,7 +84,7 @@ class MainDialog extends ComponentDialog {
      * First step in the waterfall dialog. Prompts the user for a command.
      * Currently, this expects a booking request, like "book me a flight from Paris to Berlin on march 22"
      * Note that the sample LUIS model will only recognize Paris, Berlin, New York and London as airport cities.
-     */
+      */
     async introStep(step) {
         if (!this.luisRecognizer.isConfigured) {
             const messageText = 'NOTE: LUIS is not configured. To enable all capabilities, add `LuisAppId`, `LuisAPIKey` and `LuisAPIHostName` to the .env file.';
@@ -92,8 +92,8 @@ class MainDialog extends ComponentDialog {
             return await step.next();
         }
 
-
-        const messageText = step.options.restartMsg ? step.options.restartMsg : 'Come posso aiutarti?\n\nAbcSe vuoi sapere cosa posso fare per te scrivi \"menu\"';
+        
+        const messageText = step.options.restartMsg ? step.options.restartMsg : 'Come posso aiutarti?\n\nSe vuoi sapere cosa posso fare per te scrivi \"menu\"';
         const promptMessage = MessageFactory.text(messageText, messageText, InputHints.ExpectingInput);
         return await step.prompt('TEXT_PROMPT', { prompt: promptMessage });
     }
@@ -148,6 +148,7 @@ class MainDialog extends ComponentDialog {
         
     }
 
+
     async optionStep(step) {
         console.log("OPTION STEP");
         const option = step.result.value;
@@ -189,26 +190,4 @@ class MainDialog extends ComponentDialog {
     module.exports.MainDialog = MainDialog;
     module.exports.MAIN_DIALOG = MAIN_DIALOG;
 
-    /**
-     * This is the final step in the main waterfall dialog.
-     * It wraps up the sample "book a flight" interaction with a simple confirmation.
-     */
-   /* async finalStep(stepContext) {
-        // If the child dialog ("bookingDialog") was cancelled or the user failed to confirm, the Result here will be null.
-        if (stepContext.result) {
-            const result = stepContext.result;
-            // Now we have all the booking details.
-
-            // This is where calls to the booking AOU service or database would go.
-
-            // If the call to the booking service was successful tell the user.
-            const timeProperty = new TimexProperty(result.travelDate);
-            const travelDateMsg = timeProperty.toNaturalLanguage(new Date(Date.now()));
-            const msg = `I have you booked to ${ result.destination } from ${ result.origin } on ${ travelDateMsg }.`;
-            await stepContext.context.sendActivity(msg, msg, InputHints.IgnoringInput);
-        }
-
-        // Restart the main dialog with a different message the second time around
-        return await stepContext.replaceDialog(this.initialDialogId, { restartMsg: 'What else can I do for you?' });
-    }*/
-
+   

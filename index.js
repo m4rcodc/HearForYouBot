@@ -26,8 +26,8 @@ const {
 const { HearForYouRecognizer } = require('./dialogs/HearForYouRecognizer');
 // Import bot
 const { DialogBot } = require('./bots/dialogBot');
-//Import main dialog
-const { MainDialog } = require('./dialogs/mainDialog');
+//Import welcome dialog
+const { WelcomeDialog } = require('./dialogs/welcomeDialog');
 
 // the bot's booking dialog
 //const { BookingDialog } = require('./dialogs/bookingDialog');
@@ -62,7 +62,7 @@ const luisConfig = { applicationId: LuisAppId, endpointKey: LuisAPIKey, endpoint
 const luisRecognizer = new HearForYouRecognizer(luisConfig);
 
 // Create the main dialog.
-const dialog = new MainDialog(luisRecognizer, userState);
+const dialog = new WelcomeDialog(luisRecognizer, userState);
 const bot = new DialogBot(conversationState, userState, dialog);
 
 

@@ -60,7 +60,7 @@ class OcrDialog extends ComponentDialog {
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.introStep.bind(this),
             this.downloadAttachStep.bind(this),
-            this.ocrStep.bind(this)
+            //this.ocrStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG
@@ -101,18 +101,15 @@ class OcrDialog extends ComponentDialog {
 
         await computerVision(value.contentUrl);
         
-        promise.then(function (val) {
-            console.log(val);
-        });
+       
+      
 
-        //await sleep(10000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
+        await sleep(5000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
         await step.context.sendActivity(textEdit);
-}
 
-    async ocrStep(step){
-
-
+        return await step.endDialog();
     }
+
 }
     async function computerVision(contentUrl) {
         async.series([
@@ -133,6 +130,8 @@ class OcrDialog extends ComponentDialog {
                 const writingResult = await readTextFromURL(computerVisionClient, remoteImagePath);
                 printRecText(writingResult);
 
+                
+
 
                 async function readTextFromURL(client, url) {
                     // To recognize text in a local image, replace client.read() with readTextInStream() as shown:
@@ -146,7 +145,8 @@ class OcrDialog extends ComponentDialog {
                     return result.analyzeResult.readResults; // Return the first page of result. Replace [0] with the desired page if this is a multi-page file such as .pdf or .tiff.
                 }
 
-                  function printRecText(printedText) {
+                function printRecText(printedText) {
+              
                     console.log('Recognized text:');
                     for (const page in printedText) {
                       if (printedText.length > 1) {
@@ -161,17 +161,18 @@ class OcrDialog extends ComponentDialog {
                             textEdit += line.words.map(w => w.text).join(' '); //appendo i caratteri letti nella variabile globale textedit
 
                           }
-                         // flagOcr = true;
+                         
                       }
                       else { console.log('No recognized text.'); }
-                    }
+                      }
+
+                      
                   }
                  
 
         }, 
         function () {
             return new Promise((resolve) => {
-                
                 resolve();
             })
           }

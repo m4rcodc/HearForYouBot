@@ -39,7 +39,7 @@ const {
 } = require('@azure/storage-blob');
 
 
-ffmpeg.setFfmpegPath(path.join(__dirname.replace('dialogs', 'libs'), '/ffmpeg'));
+ffmpeg.setFfmpegPath(path.join(__dirname.replace('dialogs', 'libs'), '/ffmpeg.exe'));
 
 const TEXTTOSPEECH_DIALOG = 'TEXTTOSPEECH_DIALOG';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
@@ -147,6 +147,8 @@ class TextToSpeechDialog extends ComponentDialog {
             ],
         };
         await step.context.sendActivity(message);
+
+        return step.endDialog();
 
 
     }

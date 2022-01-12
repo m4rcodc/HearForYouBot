@@ -21,13 +21,14 @@ const {
     LuisRecognizer
 } = require('botbuilder-ai');
 
-
+const {
+    MainDialog
+} = require('./mainDialog.js')
 
 const TRANSLATE_DIALOG = 'TRANSLATE_DIALOG';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const TEXT_PROMPT = 'TEXT_PROMPT';
 var linguaScelta;
-var stringaTradotta = null;
 
 class TranslateDialog extends ComponentDialog {
     constructor(luisRecognizer,userState) {
@@ -183,9 +184,10 @@ class TranslateDialog extends ComponentDialog {
             await step.context.sendActivity(stringProva);
             
 
-            //return await step.next();
+            
         }
 
+        return await step.endDialog(this.id);
     }
 
     
