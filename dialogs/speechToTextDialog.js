@@ -1,11 +1,12 @@
 const fs = require('fs');
 const http = require('https');
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
-var speechConfig = sdk.SpeechConfig.fromSubscription("68befe3c7508400196b3472c4a12ac66", "westeurope");
-speechConfig.speechRecognitionLanguage = 'it-IT';
+const SPEECH_SERVICE_SUB_KEY = process.env.SpeechServiceSubscriptionKey;
+const SPEECH_SERVICE_REGION = process.env.SpeechserviceRegion;
 const sleep = require('util').promisify(setTimeout);
-
-
+const CLOUDCONVERT_API_KEY = process.env.CloudConvertApiKey;
+var CloudConvert = require('cloudconvert');
+cloudConvert = new CloudConvert(CLOUDCONVERT_API_KEY);
 const {
     ActionTypes,
     ActivityTypes,
@@ -74,6 +75,7 @@ class SpeechToTextDialog extends ComponentDialog {
             }
         }
 
+        console.log(value);
        const message = await recognizeAudio(value);
         
       
@@ -90,29 +92,72 @@ class SpeechToTextDialog extends ComponentDialog {
 async function recognizeAudio(value) {
 
     let result;
-    
+    var fileName;
 
+    const pathAudio = value.contentUrl;
 
-    var pathAudio = value.contentUrl;
-     
     console.log(pathAudio);
 
     result = await fromFile(pathAudio);
     result = await result();
 
+    fs.unlinkSync(fileName);
+
     return result.text;
 
     async function fromFile(pathAudio) {
 
-        const file = fs.createWriteStream("audioSpeech.wav");
-        const request = http.get(pathAudio, function (response) {
-            response.pipe(file);
+        let job = await cloudConvert.jobs.create({
+            "tasks": {
+                "import-1": {
+                    "operation": "import/url",
+                    "url": pathAudio
+                },
+                "task-1": {
+                    "operation": "convert",
+                    "input": [
+                        "import-1"
+                    ],
+                    "output_format": "wav"
+                },
+                "export-1": {
+                    "operation": "export/url",
+                    "input": [
+                        "task-1"
+                    ],
+                    "inline": false,
+                    "archive_multiple_files": false
+                }
+            },
+            "tag": "jobbuilder"
         });
 
-        let audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync("audioSpeech.wav"));
+        job = await cloudConvert.jobs.wait(job.id);
+
+        const exportTask = job.tasks.filter(task => task.operation === 'export/url' && task.status === 'finished')[0];
+        const file = exportTask.result.files[0];
+
+        const writeStream = fs.createWriteStream(file.filename);
+
+        http.get(file.url, function (response) {
+            response.pipe(writeStream);
+        });
+
+        await new Promise((resolve, reject) => {
+            writeStream.on('finish', resolve);
+            writeStream.on('error', reject);
+        });
+
+
+        let audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync(file.filename));
+
+        var speechConfig = sdk.SpeechConfig.fromSubscription(SPEECH_SERVICE_SUB_KEY, SPEECH_SERVICE_REGION);
+        speechConfig.speechRecognitionLanguage = 'it-IT';
 
         let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
 
+        fileName = file.filename;
+        
 
 
         const recognize = () => {
@@ -132,30 +177,6 @@ async function recognizeAudio(value) {
     }
     
 
-/*
-        switch (result.reason) {
-            case sdk.ResultReason.RecognizedSpeech:
-                console.log(`RECOGNIZED: Text=${result.text}`);
-                textStampato = result.text; 
-                recognizer.close();
-                break;
-            case sdk.ResultReason.NoMatch:
-                console.log("NOMATCH: Speech could not be recognized.");
-                break;
-            case sdk.ResultReason.Canceled:
-                const cancellation = CancellationDetails.fromResult(result);
-                console.log(`CANCELED: Reason=${cancellation.reason}`);
-
-                if (cancellation.reason == sdk.CancellationReason.Error) {
-                    console.log(`CANCELED: ErrorCode=${cancellation.ErrorCode}`);
-                    console.log(`CANCELED: ErrorDetails=${cancellation.errorDetails}`);
-                    console.log("CANCELED: Did you update the key and location/region info?");
-                }
-                break;
-        }
-        recognizer.close();
-
-*/
     
 
 

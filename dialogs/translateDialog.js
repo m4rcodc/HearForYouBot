@@ -1,9 +1,10 @@
 // Import required types from libraries
 const axios = require('axios').default;
 const { v4: uuidv4 } = require('uuid');
-var subscriptionKey = "7effd08ae926474c95b33871fc35d9f2";
-var endpoint = "https://api.cognitive.microsofttranslator.com/";
-var location = "westeurope";
+const AZURE_TRANSLATE_SUB_KEY = process.env.AzureTranslateServiceKey;
+const AZURE_TRANSLATE_ENDPOINT = process.env.AzureTranslateServiceEndpoint;
+const AZURE_TRANSLATE_LOCATION = process.env.AzureTranslateServiceLocation;
+
 const {
     ActionTypes,
     ActivityTypes,
@@ -107,6 +108,7 @@ class TranslateDialog extends ComponentDialog {
 
     async optionLinguaStep(step) {
         console.log("OPTION LINGUA STEP");
+       
 
         const lingua = step.result;
         console.log(lingua);
@@ -153,12 +155,12 @@ class TranslateDialog extends ComponentDialog {
         var prova = null;
 
         var axiosOptions = {
-            baseURL: endpoint,
+            baseURL: AZURE_TRANSLATE_ENDPOINT,
             url: '/translate',
             method: 'post',
             headers: {
-                'Ocp-Apim-Subscription-Key': subscriptionKey,
-                'Ocp-Apim-Subscription-Region': location,
+                'Ocp-Apim-Subscription-Key': AZURE_TRANSLATE_SUB_KEY,
+                'Ocp-Apim-Subscription-Region': AZURE_TRANSLATE_LOCATION,
                 'Content-type': 'application/json',
                 'X-ClientTraceId': uuidv4().toString()
             },

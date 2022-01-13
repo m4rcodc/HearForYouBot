@@ -11,11 +11,11 @@ const ApiKeyCredentials = require('@azure/ms-rest-js').ApiKeyCredentials;
  * AUTHENTICATE
  * This single client is used for all examples.
  */
-const key = 'f949748f29f546fd8199180f2d052826';
-const endpoint = 'https://ocrhearforyou.cognitiveservices.azure.com/';
+const COMPUTERVISION_KEY = process.env.ComputerVisionKey;
+const COMPUTERVISION_ENDPOINT = process.env.ComputerVisionEndPoint;
 
 const computerVisionClient = new ComputerVisionClient(
-    new ApiKeyCredentials({ inHeader: { 'Ocp-Apim-Subscription-Key': key } }), endpoint);
+    new ApiKeyCredentials({ inHeader: { 'Ocp-Apim-Subscription-Key': COMPUTERVISION_KEY } }), COMPUTERVISION_ENDPOINT);
 
 const axios = require('axios').default;
 const { v4: uuidv4 } = require('uuid');

@@ -7,6 +7,6 @@
     "\\deploymentTemplates",
     "\\dialogs"
   ],
-  "SelectedNode": "\\.env",
+  "SelectedNode": "\\dialogs\\ocrDialog.js",
   "PreviewInSolutionExplorer": false
 }

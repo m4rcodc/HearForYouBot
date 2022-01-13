@@ -27,6 +27,7 @@
         "botbuilder-ai": "~4.15.0",
         "botbuilder-dialogs": "~4.15.0",
         "botbuilder-testing": "~4.15.0",
+        "cloudconvert": "^2.2.4",
         "dotenv": "^8.6.0",
         "ffmpeg": "^0.0.4",
         "fluent-ffmpeg": "^2.1.2",

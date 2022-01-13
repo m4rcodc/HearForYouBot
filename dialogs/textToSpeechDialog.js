@@ -3,15 +3,13 @@ var readline = require("readline");
 const {v4: uuid} = require('uuid');
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
-var subscriptionKey = "68befe3c7508400196b3472c4a12ac66";
-var serviceRegion = "westeurope";
 const sleep = require('util').promisify(setTimeout);
 const Bluebird = require('bluebird');
 var fs = require('fs');
-
-//const serverUrl = 'https://hearforyoubot.azurewebsites.net';
-
-
+const AZURE_STORAGE_ENDPOINT = process.env.AzureStorageEndpoint;
+const AZURE_STORAGE_TOKEN_SAS = process.env.TokenAzureStorageSAS;
+const SPEECH_SERVICE_SUB_KEY = process.env.SpeechServiceSubscriptionKey;
+const SPEECH_SERVICE_REGION = process.env.SpeechserviceRegion;
 
 
 const {
@@ -107,12 +105,10 @@ class TextToSpeechDialog extends ComponentDialog {
         text = step.result;
         let message = {};
         
-        await syntethizeAudio(text,step); //la return di questo metodo non funziona, restituisce sempre undefined
+        await syntethizeAudio(text,step); 
        
       
-        const blobServiceClient = new BlobServiceClient(
-            'https://hearforyoustorage.blob.core.windows.net/?sv=2020-08-04&ss=bfqt&srt=sco&sp=rwdlacupitfx&se=2022-12-10T03:16:34Z&st=2022-01-10T19:16:34Z&spr=https&sig=yZh2v9l0IbVt8wE5jcteyrpnw5PKyME6mzDm8jHvvDQ%3D'          
-            );
+        const blobServiceClient = new BlobServiceClient(AZURE_STORAGE_ENDPOINT + AZURE_STORAGE_TOKEN_SAS);
           
             const containerName = 'public';
             const containerClient = blobServiceClient.getContainerClient(containerName);
@@ -139,9 +135,7 @@ class TextToSpeechDialog extends ComponentDialog {
                 {
                     method: 'sendAudio',
                     parameters: {
-                        audio: `https://hearforyoustorage.blob.core.windows.net/public/${globalName}`
-                        //voice: `${process.env.SERVER_URL}/public/${audioName}`
-                        
+                        audio: `${AZURE_STORAGE_ENDPOINT}/public/${globalName}`
                     },
                 },
             ],
@@ -159,7 +153,7 @@ class TextToSpeechDialog extends ComponentDialog {
 
         var audioConfig = sdk.AudioConfig.fromAudioFileOutput(path.join(__dirname.replace('dialogs','bots'),'/audio/', 'message.wav'));
 
-        var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+           var speechConfig = sdk.SpeechConfig.fromSubscription(SPEECH_SERVICE_SUB_KEY, SPEECH_SERVICE_REGION);
 
         var synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
         

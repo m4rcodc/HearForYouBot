@@ -66,7 +66,7 @@ class WelcomeDialog extends ComponentDialog {
 
         var card = CardFactory.thumbnailCard(
             'Benvenuto, sono HearForYouBot!',
-            [{ url: 'https://i.postimg.cc/MH1nV0Js/Logo-Hear-For-You.png' }],
+            [{ url: 'https://i.postimg.cc/jqZ3swjy/Hear-For-You.jpg' }],
             [],
             {
 
