@@ -2,11 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\bots",
+    "\\bots\\audio",
     "\\cognitiveModels",
     "\\deploymentScripts",
     "\\deploymentTemplates",
     "\\dialogs"
   ],
-  "SelectedNode": "\\dialogs\\ocrDialog.js",
   "PreviewInSolutionExplorer": false
 }

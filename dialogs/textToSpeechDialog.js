@@ -114,7 +114,7 @@ class TextToSpeechDialog extends ComponentDialog {
             const containerClient = blobServiceClient.getContainerClient(containerName);
             //const createContainerResponse = await containerClient.create();
             const blockBlobClient = containerClient.getBlockBlobClient(globalName);
-
+        
 
             const blobOptions = {
                 blobHTTPHeaders: {
@@ -124,24 +124,31 @@ class TextToSpeechDialog extends ComponentDialog {
             
             
             await blockBlobClient.uploadFile(globalLocalPath, blobOptions);
-           
+
+        //Cancello il file che ho in memoria
+         //  fs.delete(globalLocalPath);
 
             console.log("Blob was uploaded successfully");
 
-            console.log('\nListing blobs...');
+        console.log('\nListing blobs...');
+
+
 
         message = {
             channelData : [
                 {
                     method: 'sendAudio',
                     parameters: {
-                        audio: `${AZURE_STORAGE_ENDPOINT}/public/${globalName}`
+                        audio: `${AZURE_STORAGE_ENDPOINT}/public/${globalName}`,
+                        caption: text
                     },
                 },
             ],
         };
         await step.context.sendActivity(message);
 
+        
+        blockBlobClient.delete();
         return step.endDialog();
 
 
