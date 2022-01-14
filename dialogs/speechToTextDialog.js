@@ -39,8 +39,7 @@ class SpeechToTextDialog extends ComponentDialog {
         this.addDialog(new AttachmentPrompt('ATT_PROMPT'));
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.introStep.bind(this),
-            this.speechToText.bind(this),
-            this.finalStep.bind(this)
+            this.speechToText.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
@@ -60,7 +59,7 @@ class SpeechToTextDialog extends ComponentDialog {
     async introStep(step) {
 
         return await step.prompt(ATT_PROMPT, {
-            prompt: 'Dammi un file audio in input'
+            prompt: 'Dammi un file audio in input:'
         });
     }  
 
@@ -79,12 +78,11 @@ class SpeechToTextDialog extends ComponentDialog {
        const message = await recognizeAudio(value);
         
       
-        await step.context.sendActivity(message);   
+        await step.context.sendActivity(message);
+        return await step.endDialog();
 }
 
-            async finalStep(step) {
-            return await step.endDialog();
-        }
+          
 
 }
 

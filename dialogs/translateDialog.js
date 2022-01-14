@@ -1,4 +1,4 @@
-// Import required types from libraries
+﻿// Import required types from libraries
 const axios = require('axios').default;
 const { v4: uuidv4 } = require('uuid');
 const AZURE_TRANSLATE_SUB_KEY = process.env.AzureTranslateServiceKey;
@@ -23,8 +23,9 @@ const {
 } = require('botbuilder-ai');
 
 const {
-    MainDialog
+    MAIN_DIALOG,
 } = require('./mainDialog.js')
+
 
 const TRANSLATE_DIALOG = 'TRANSLATE_DIALOG';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
@@ -84,6 +85,16 @@ class TranslateDialog extends ComponentDialog {
                 type: ActionTypes.ImBack,
                 title: 'Francese',
                 value: 'francese'
+            },
+            {
+                type: ActionTypes.ImBack,
+                title: 'Spagnolo',
+                value: 'spagnolo'
+            },
+            {
+                type: ActionTypes.ImBack,
+                title: 'Russo',
+                value: 'russo'
             }
         ];
 
@@ -100,8 +111,10 @@ class TranslateDialog extends ComponentDialog {
         await step.context.sendActivity(reply);
 
         return await step.prompt(TEXT_PROMPT, {
-            prompt: 'Scrivimi la lingua in cui vuoi tradurre il testo'
+            prompt: 'Scrivimi la lingua in cui vuoi tradurre il testo:'
         });
+
+       
 
     
     }
@@ -110,41 +123,67 @@ class TranslateDialog extends ComponentDialog {
         console.log("OPTION LINGUA STEP");
        
 
-        const lingua = step.result;
-        console.log(lingua);
+        const option = step.result;
+        
 
    
         const luisResult = await this.luisRecognizer.executeLuisQuery(step.context);
 
-        if(lingua === "Inglese" || LuisRecognizer.topIntent(luisResult) === 'LinguaInglese' ) {
+        if (option === "Inglese" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'LinguaInglese' ) {
 
-                linguaScelta = 'en';
+                linguaScelta = 'en-EN';
             
         }
 
-        else if(lingua === "Francese" || LuisRecognizer.topIntent(luisResult) === 'LinguaFrancese') {
+        else if (option === "Francese" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'LinguaFrancese') {
 
-                linguaScelta = 'fr';
+                linguaScelta = 'fr-FR';
         }
 
-        else if(lingua === "Tedesco" || LuisRecognizer.topIntent(luisResult) === 'LinguaTedesca'){
+        else if (option === "Tedesco" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'LinguaTedesca'){
 
-                linguaScelta = 'de';
+                linguaScelta = 'de-DE';
         }
 
-        else if(lingua === "Italiano" ||  LuisRecognizer.topIntent(luisResult) === 'LinguaItaliana') {
+        else if (option === "Spagnolo" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'LinguaSpagnola') {
 
-                linguaScelta = 'it';
+            linguaScelta = 'es-ES';
         }
+
+        else if (option === "Russo" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'LinguaRussa') {
+
+            linguaScelta = 'ru-RU';
+        }
+
+        else if (option === "Italiano" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'LinguaItaliana') {
+
+                linguaScelta = 'it-IT';
+        }
+
+        else if (option === "Annulla" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'AnnullaAzione') {
+
+               return await step.endDialog(this.id);
+            
+        }
+
+        else if (option === "Esci" || LuisRecognizer.topIntent(luisResult,"",0.7) === 'StopBot') {
+
+            await step.context.sendActivity("Spero di esserti stato d'aiuto! Ciao, alla prossima!👋");
+            return await step.cancelAllDialogs(this.id);
+
+        }
+       
         else {
 
-            await step.context.sendActivity("Sembra che tu abbia digitato una lingua in cui non posso tradurre! Riprova selezionando tra le opzioni disponibili.");
+            await step.context.sendActivity("Sembra che tu abbia digitato una lingua in cui non posso tradurre!🤷 Riprova selezionando tra le opzioni disponibili.");
             return await step.replaceDialog(this.id);
         }
 
         return await step.prompt(TEXT_PROMPT, {
-            prompt: 'Inserisci il testo da tradurre'
+            prompt: 'Inserisci il testo da tradurre:'
         });
+
+       
 
     }
     

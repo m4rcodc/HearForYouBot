@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 const { MessageFactory, 
@@ -41,6 +41,8 @@ const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const MAIN_DIALOG = 'MAIN_DIALOG'
 const TEXT_PROMPT = 'TEXT_PROMPT';
 
+
+
 class MainDialog extends ComponentDialog {
     constructor(luisRecognizer, userState) {
         super('MAIN_DIALOG');
@@ -48,6 +50,11 @@ class MainDialog extends ComponentDialog {
         if (!luisRecognizer) throw new Error('[MainDialog]: Missing parameter \'luisRecognizer\' is required');
         this.luisRecognizer = luisRecognizer;
         this.userState = userState;
+
+
+
+       
+
         //Adding used dialogs
         this.addDialog(new TextToSpeechDialog());
         this.addDialog(new OcrDialog());
@@ -56,6 +63,7 @@ class MainDialog extends ComponentDialog {
         this.addDialog(new TextPrompt('TEXT_PROMPT'));
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
                 this.introStep.bind(this),
+                this.menuStep.bind(this),
                 this.mainMenuStep.bind(this),
                 this.optionStep.bind(this),
                 this.loopStep.bind(this)
@@ -80,11 +88,7 @@ class MainDialog extends ComponentDialog {
         }
     }
 
-    /**
-     * First step in the waterfall dialog. Prompts the user for a command.
-     * Currently, this expects a booking request, like "book me a flight from Paris to Berlin on march 22"
-     * Note that the sample LUIS model will only recognize Paris, Berlin, New York and London as airport cities.
-      */
+   
     async introStep(step) {
         if (!this.luisRecognizer.isConfigured) {
             const messageText = 'NOTE: LUIS is not configured. To enable all capabilities, add `LuisAppId`, `LuisAPIKey` and `LuisAPIHostName` to the .env file.';
@@ -92,10 +96,37 @@ class MainDialog extends ComponentDialog {
             return await step.next();
         }
 
-        
+        /*
         const messageText = step.options.restartMsg ? step.options.restartMsg : 'Come posso aiutarti?\n\nSe vuoi sapere cosa posso fare per te scrivi \"menu\"';
         const promptMessage = MessageFactory.text(messageText, messageText, InputHints.ExpectingInput);
         return await step.prompt('TEXT_PROMPT', { prompt: promptMessage });
+        */
+        const messageText = 'Come posso aiutarti?\n\nSe vuoi sapere cosa posso fare per te scrivi \"menu\"';
+        return await step.prompt(TEXT_PROMPT, {
+            prompt: messageText
+        });
+
+
+    }
+
+    async menuStep(step) {
+
+        const option = step.result;
+        const luisResult = await this.luisRecognizer.executeLuisQuery(step.context);
+        if (option === "menu" || LuisRecognizer.topIntent(luisResult, "", 0.8) === 'Menu') {
+            return await step.next();
+        }
+        else if (option === "Esci" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'StopBot') {
+
+            await step.context.sendActivity("Spero di esserti stato d'aiuto! Ciao, alla prossima!👋");
+            return await step.cancelAllDialogs(this.id);
+
+        }
+        else {
+            await step.context.sendActivity("Sembra che tu abbia digitato un comando che non conosco!⛔ Riprova.");
+            return await step.replaceDialog(this.id);
+        }
+
     }
 
     /**
@@ -116,12 +147,12 @@ class MainDialog extends ComponentDialog {
             {
                 type: ActionTypes.ImBack,
                 title: 'Genera un file testuale a partire da un file audio',
-                value: 'audio in testo'
+                value: 'convertimi una registrazione in un testo'
             },
             {
                 type: ActionTypes.ImBack,
                 title: 'Genera un file audio a partire da un file testuale',
-                value: 'text to audio'
+                value: 'generami un audio da un testo'
             },
             {
                 type: ActionTypes.ImBack,
@@ -155,29 +186,36 @@ class MainDialog extends ComponentDialog {
         console.log(option);
             console.log("Sono qui 1");
             const luisResult = await this.luisRecognizer.executeLuisQuery(step.context);
-            if(option === "Traduci" || LuisRecognizer.topIntent(luisResult) === 'Traduzione' ) {
+        if (option === "Traduci" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'Traduzione' ) {
                 console.log("Vado nel dialogo che gestisce la traduzione");
                 return await step.beginDialog("TRANSLATE_DIALOG");
             }
 
-            else if(option === "Tradurre un file audio in testuale" || LuisRecognizer.topIntent(luisResult) === 'AudioTesto') {
+              else if (option === "Tradurre un file audio in testuale" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'AudioTesto') {
                 console.log("Vado nel dialogo che gestisce lo SpeechToText");
                 return await step.beginDialog("SPEECHTOTEXT_DIALOG");
             }
 
-            else if(option === "Tradurre un file testuale in audio" || LuisRecognizer.topIntent(luisResult) === 'TestoAudio') {
+              else if (option === "Tradurre un file testuale in audio" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'TestoAudio') {
                 console.log("Vado nel dialogo che gestisce il TextToSpeech");
                 return await step.beginDialog("TEXTTOSPEECH_DIALOG");
             }
 
-            else if(option === "Prendere testo da immagine" || LuisRecognizer.topIntent(luisResult) === 'TestoDaImmagine') {
+              else if (option === "Prendere testo da immagine" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'TestoDaImmagine') {
                 console.log("Vado nel dialogo che gestisce l'OCR");
                 return await step.beginDialog("OCR_DIALOG");
-            }
+              }
+
+              else if (option === "Esci" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'StopBot') {
+
+            await step.context.sendActivity("Spero di esserti stato d'aiuto! Ciao, alla prossima!👋");
+                  return await step.cancelAllDialogs(this.id);
+
+              }
 
             else {
 
-                await step.context.sendActivity("Sembra che tu abbia digitato un comando che non conosco! Riprova.");
+                  await step.context.sendActivity("Sembra che tu abbia digitato un comando che non conosco!⛔ Riprova.");
             }
 
             return await step.replaceDialog(this.id);

@@ -60,7 +60,6 @@ class OcrDialog extends ComponentDialog {
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.introStep.bind(this),
             this.downloadAttachStep.bind(this)
-            //this.ocrStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG
@@ -80,7 +79,7 @@ class OcrDialog extends ComponentDialog {
     async introStep(step) {
 
         return await step.prompt(ATT_PROMPT, {
-            prompt: 'Inserisci un\'immagine da cui ricavare un testo'
+            prompt: 'Inserisci un\'immagine da cui ricavare un testo:'
         });
 
     }
@@ -141,6 +140,8 @@ class OcrDialog extends ComponentDialog {
                     while (result.status !== STATUS_SUCCEEDED) { await sleep(1000); result = await client.getReadResult(operation); }
                     return result.analyzeResult.readResults; // Return the first page of result. Replace [0] with the desired page if this is a multi-page file such as .pdf or .tiff.
                 }
+
+                 
 
                 function printRecText(printedText) {
               

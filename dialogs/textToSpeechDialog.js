@@ -60,8 +60,7 @@ class TextToSpeechDialog extends ComponentDialog {
             this.gestioneFileAudio.bind(this),
             this.introStep.bind(this),
             this.textToSpeechStep.bind(this),
-            //this.getUploadedAttachment.bind(this),
-            //this.finalStep.bind(this)
+       
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
@@ -97,7 +96,7 @@ class TextToSpeechDialog extends ComponentDialog {
     async introStep(step) {
 
         return await step.prompt(TEXT_PROMPT, {
-            prompt: 'Inserisci un testo da convertire in audio'
+            prompt: 'Inserisci un testo da convertire in audio:'
         });
     }
 
@@ -155,7 +154,7 @@ class TextToSpeechDialog extends ComponentDialog {
         await fs.unlinkSync(globalLocalPath);
     
 
-        return step.endDialog();
+        return await step.endDialog();
 
 
     }
@@ -208,28 +207,33 @@ class TextToSpeechDialog extends ComponentDialog {
         
         //const id = uuid();
 
-           function promisifyCommand(command) {
-               return Bluebird.Promise.promisify((cb) => {
-                   command
+
+
+            await syn(text);
+
+
+           const command = () => {
+               return new Promise((resolve, reject) => {
+                   ffmpeg(path.join(dir, 'message.wav'))
+                       .outputOptions('-acodec libmp3lame')
+                       .format('mp3')
                        .on('end', () => {
-                           cb(null);
+                           console.log("Conversione riuscita!");
+                           resolve();
                        })
                        .on('error', (err) => {
-                           cb(err);
+                           console.log("Conversione non riuscita!");
+                           reject();
                        })
                        .save(path.join(dir, nomeFile + '.mp3'));
-               });
+               })
            }
-
-
-        await syn(text);
-
-
-           const command = ffmpeg(path.join(dir, 'message.wav'))
-               .outputOptions('-acodec libmp3lame')
-               .format('mp3');
               
-           await promisifyCommand(command)();
+
+          
+               await command();
+              
+          
 
        
            console.log(dir + " " + nomeFile);
