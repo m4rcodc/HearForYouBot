@@ -122,11 +122,11 @@ class TextToSpeechDialog extends ComponentDialog {
                 }
             };
             
-            
-            await blockBlobClient.uploadFile(globalLocalPath, blobOptions);
 
-        //Cancello il file che ho in memoria
-         //  fs.delete(globalLocalPath);
+        
+        await blockBlobClient.uploadFile(globalLocalPath, blobOptions);
+        
+
 
             console.log("Blob was uploaded successfully");
 
@@ -140,15 +140,21 @@ class TextToSpeechDialog extends ComponentDialog {
                     method: 'sendAudio',
                     parameters: {
                         audio: `${AZURE_STORAGE_ENDPOINT}/public/${globalName}`,
-                        caption: text
+                        //caption: text
                     },
                 },
             ],
         };
-        await step.context.sendActivity(message);
 
+
+        await step.context.sendActivity(message);
         
-        blockBlobClient.delete();
+        
+        await blockBlobClient.delete();
+
+        await fs.unlinkSync(globalLocalPath);
+    
+
         return step.endDialog();
 
 
@@ -160,7 +166,7 @@ class TextToSpeechDialog extends ComponentDialog {
 
         var audioConfig = sdk.AudioConfig.fromAudioFileOutput(path.join(__dirname.replace('dialogs','bots'),'/audio/', 'message.wav'));
 
-           var speechConfig = sdk.SpeechConfig.fromSubscription(SPEECH_SERVICE_SUB_KEY, SPEECH_SERVICE_REGION);
+        var speechConfig = sdk.SpeechConfig.fromSubscription(SPEECH_SERVICE_SUB_KEY, SPEECH_SERVICE_REGION);
 
         var synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
         

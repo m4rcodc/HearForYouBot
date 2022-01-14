@@ -12,7 +12,7 @@ const ApiKeyCredentials = require('@azure/ms-rest-js').ApiKeyCredentials;
  * This single client is used for all examples.
  */
 const COMPUTERVISION_KEY = process.env.ComputerVisionKey;
-const COMPUTERVISION_ENDPOINT = process.env.ComputerVisionEndPoint;
+const COMPUTERVISION_ENDPOINT = process.env.ComputerVisionEndpoint;
 
 const computerVisionClient = new ComputerVisionClient(
     new ApiKeyCredentials({ inHeader: { 'Ocp-Apim-Subscription-Key': COMPUTERVISION_KEY } }), COMPUTERVISION_ENDPOINT);
@@ -59,7 +59,7 @@ class OcrDialog extends ComponentDialog {
         this.addDialog(new AttachmentPrompt('ATT_PROMPT'));
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.introStep.bind(this),
-            this.downloadAttachStep.bind(this),
+            this.downloadAttachStep.bind(this)
             //this.ocrStep.bind(this)
         ]));
 
@@ -93,18 +93,15 @@ class OcrDialog extends ComponentDialog {
         for (const key in attach) {
             if (attach.hasOwnProperty(key)) {
                 value = attach[key];
-                console.log(value.name);
-        
             }
         }
 
 
         await computerVision(value.contentUrl);
         
-       
       
 
-        await sleep(5000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
+        await sleep(3000); //dobbiamo inserire al posto di questo qualcosa per attendere che il metodo computer vision finisca
         await step.context.sendActivity(textEdit);
 
         return await step.endDialog();

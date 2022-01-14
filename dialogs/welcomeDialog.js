@@ -59,10 +59,10 @@ class WelcomeDialog extends ComponentDialog {
 
 
         var testo = "Con questo bot potrai svolgere diverse funzionalita, tra cui quelle di:" +
-            "\n\n - SpeechToText per poter tradurre un file audio in testo." +
-            "\n\n - TextToSpeech per poter tradurre un file testuale in audio." +
-            "\n\n - Translate per poter tradurre il testo in un \' altra lingua." +
-            "\n\n - ComputerVision per poter estrarre del testo da un \'immagine a tua scelta."
+            "\n\n  SpeechToText per poter tradurre un file audio in testo." +
+            "\n\n  TextToSpeech per poter tradurre un file testuale in audio." +
+            "\n\n  Translate per poter tradurre il testo in un \' altra lingua." +
+            "\n\n  ComputerVision per poter estrarre del testo da un \'immagine a tua scelta."
 
         var card = CardFactory.thumbnailCard(
             'Benvenuto, sono HearForYouBot!',
