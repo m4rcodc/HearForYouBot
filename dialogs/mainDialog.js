@@ -141,22 +141,22 @@ class MainDialog extends ComponentDialog {
 
         const buttons = [{
                 type: ActionTypes.ImBack,
-                title: 'Traduci un testo in altra lingua',
+                title: '🌏Traduci un testo in altra lingua',
                 value: 'Traduci'
             },
             {
                 type: ActionTypes.ImBack,
-                title: 'Genera un file testuale a partire da un file audio',
+                title: '📄Genera un file testuale a partire da un file audio',
                 value: 'convertimi una registrazione in un testo'
             },
             {
                 type: ActionTypes.ImBack,
-                title: 'Genera un file audio a partire da un file testuale',
+                title: '🔊Genera un file audio a partire da un file testuale',
                 value: 'generami un audio da un testo'
             },
             {
                 type: ActionTypes.ImBack,
-                title: 'Ricava il testo da un immagine',
+                title: '🖼Ricava il testo da un immagine',
                 value: 'testo da immagine'
             }
         ];
