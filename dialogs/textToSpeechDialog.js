@@ -37,7 +37,7 @@ const {
 } = require('@azure/storage-blob');
 
 
-ffmpeg.setFfmpegPath(path.join(__dirname.replace('dialogs', 'libs'), '/ffmpeg.exe'));
+ffmpeg.setFfmpegPath(path.join(__dirname.replace('dialogs', 'libs'), '/ffmpeg'));
 
 const TEXTTOSPEECH_DIALOG = 'TEXTTOSPEECH_DIALOG';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
@@ -219,7 +219,7 @@ class TextToSpeechDialog extends ComponentDialog {
                        .format('mp3')
                        .on('end', () => {
                            console.log("Conversione riuscita!");
-                           resolve();
+                           resolve(path.join(dir, nomeFile + '.mp3'));
                        })
                        .on('error', (err) => {
                            console.log("Conversione non riuscita!");
@@ -230,8 +230,9 @@ class TextToSpeechDialog extends ComponentDialog {
            }
               
 
+           let pathSave;
+           pathSave = await command();
           
-               await command();
               
           
 
@@ -239,11 +240,11 @@ class TextToSpeechDialog extends ComponentDialog {
            console.log(dir + " " + nomeFile);
 
 
-           const localPath = path.join(dir, nomeFile + '.mp3');
+          
 
            const localName = nomeFile + '.mp3';
 
-           globalLocalPath = localPath;
+           globalLocalPath = pathSave;
 
            globalName = localName;
 
