@@ -1,8 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-const { MessageFactory, 
-        InputHints,
+const { InputHints,
         ActivityTypes,
         ActionTypes,
         CardFactory
@@ -18,22 +17,18 @@ const { ComponentDialog,
 
 //Import secondary dialogs
 const {
-    TRANSLATE_DIALOG,
     TranslateDialog
 } = require('./translateDialog');
 
 const {
-    SPEECHTOTEXT_DIALOG,
     SpeechToTextDialog
 } = require('./speechToTextDialog');
 
 const {
-    OCR_DIALOG,
     OcrDialog
 } = require('./ocrDialog.js');
 
 const {
-    TEXTTOSPEECH_DIALOG,
     TextToSpeechDialog
 } = require('./textToSpeechDialog.js');
 
@@ -50,10 +45,6 @@ class MainDialog extends ComponentDialog {
         if (!luisRecognizer) throw new Error('[MainDialog]: Missing parameter \'luisRecognizer\' is required');
         this.luisRecognizer = luisRecognizer;
         this.userState = userState;
-
-
-
-       
 
         //Adding used dialogs
         this.addDialog(new TextToSpeechDialog());
@@ -130,11 +121,9 @@ class MainDialog extends ComponentDialog {
     }
 
     /**
-     * Second step in the waterfall.  This will use LUIS to attempt to extract the origin, destination and travel dates.
-     * Then, it hands off to the bookingDialog child dialog to collect any remaining details.
+     * Pulsanti menù principale del bot
      */
     async mainMenuStep(step) {
-        console.log("MENUSTEP");
         const reply = {
             type: ActivityTypes.Message
         };
@@ -179,12 +168,9 @@ class MainDialog extends ComponentDialog {
         
     }
 
-
+    
     async optionStep(step) {
-        console.log("OPTION STEP");
         const option = step.result.value;
-        console.log(option);
-            console.log("Sono qui 1");
             const luisResult = await this.luisRecognizer.executeLuisQuery(step.context);
         if (option === "Traduci" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'Traduzione' ) {
                 console.log("Vado nel dialogo che gestisce la traduzione");

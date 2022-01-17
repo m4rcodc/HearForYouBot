@@ -1,4 +1,4 @@
-# CoreBot
+# HearForYou
 
 Bot Framework v4 core bot sample.
 

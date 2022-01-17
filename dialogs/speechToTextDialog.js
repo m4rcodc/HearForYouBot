@@ -3,10 +3,11 @@ const http = require('https');
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
 const SPEECH_SERVICE_SUB_KEY = process.env.SpeechServiceSubscriptionKey;
 const SPEECH_SERVICE_REGION = process.env.SpeechserviceRegion;
-const sleep = require('util').promisify(setTimeout);
 const CLOUDCONVERT_API_KEY = process.env.CloudConvertApiKey;
 var CloudConvert = require('cloudconvert');
+const SPEECH_LANGUAGE = process.env.SpeechLanguage;
 cloudConvert = new CloudConvert(CLOUDCONVERT_API_KEY);
+
 const {
     ActionTypes,
     ActivityTypes,
@@ -150,7 +151,7 @@ async function recognizeAudio(value) {
         let audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync(file.filename));
 
         var speechConfig = sdk.SpeechConfig.fromSubscription(SPEECH_SERVICE_SUB_KEY, SPEECH_SERVICE_REGION);
-        speechConfig.speechRecognitionLanguage = 'it-IT';
+        speechConfig.speechRecognitionLanguage = SPEECH_LANGUAGE;
 
         let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
 
@@ -174,10 +175,6 @@ async function recognizeAudio(value) {
         return recognize;
     }
     
-
-    
-
-
 }
 
 

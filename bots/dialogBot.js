@@ -1,6 +1,5 @@
-const { ActivityHandler,ActivityTypes } = require('botbuilder');
-const { CardFactory } = require('botbuilder');
-//const WelcomeCard = require('./resources/welcomeCard.json');
+const { ActivityHandler } = require('botbuilder');
+
 
 class DialogBot extends ActivityHandler {
     /**

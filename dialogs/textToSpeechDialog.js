@@ -1,10 +1,6 @@
 var sdk = require("microsoft-cognitiveservices-speech-sdk");
-var readline = require("readline");
-const {v4: uuid} = require('uuid');
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
-const sleep = require('util').promisify(setTimeout);
-const Bluebird = require('bluebird');
 var fs = require('fs');
 const AZURE_STORAGE_ENDPOINT = process.env.AzureStorageEndpoint;
 const AZURE_STORAGE_TOKEN_SAS = process.env.TokenAzureStorageSAS;
@@ -12,26 +8,14 @@ const SPEECH_SERVICE_SUB_KEY = process.env.SpeechServiceSubscriptionKey;
 const SPEECH_SERVICE_REGION = process.env.SpeechserviceRegion;
 
 
-const {
-    ActionTypes,
-	CardFactory,
-	StatePropertyAccessor,
-	TurnContext,
-	UserState,
-} = require('botbuilder');
-const { LuisRecognizer } = require('botbuilder-ai');
+
 const {
     ComponentDialog,
 	DialogSet,
-	DialogState,
 	DialogTurnStatus,
 	WaterfallDialog,
-	WaterfallStepContext,
     TextPrompt,
-    ThisMemoryScope
 } = require('botbuilder-dialogs');
-const { ActivityReceivedEventArgs } = require("microsoft-cognitiveservices-speech-sdk");
-const { getEnvironmentData } = require("worker_threads");
 const {
     BlobServiceClient
 } = require('@azure/storage-blob');
@@ -44,7 +28,6 @@ const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const TEXT_PROMPT = 'TEXT_PROMPT';
 
 //Variabili globali
-var text = null;
 var nomeFile = '';
 var globalName = "";
 var globalLocalPath = "";
@@ -101,7 +84,8 @@ class TextToSpeechDialog extends ComponentDialog {
     }
 
     async textToSpeechStep(step) {
-        text = step.result;
+
+        var text = step.result;
         let message = {};
         
         await syntethizeAudio(text,step); 
@@ -111,7 +95,6 @@ class TextToSpeechDialog extends ComponentDialog {
           
             const containerName = 'public';
             const containerClient = blobServiceClient.getContainerClient(containerName);
-            //const createContainerResponse = await containerClient.create();
             const blockBlobClient = containerClient.getBlockBlobClient(globalName);
         
 
@@ -124,13 +107,8 @@ class TextToSpeechDialog extends ComponentDialog {
 
         
         await blockBlobClient.uploadFile(globalLocalPath, blobOptions);
-        
-
 
             console.log("Blob was uploaded successfully");
-
-        console.log('\nListing blobs...');
-
 
 
         message = {
@@ -139,7 +117,6 @@ class TextToSpeechDialog extends ComponentDialog {
                     method: 'sendAudio',
                     parameters: {
                         audio: `${AZURE_STORAGE_ENDPOINT}/public/${globalName}`,
-                        //caption: text
                     },
                 },
             ],
@@ -204,11 +181,6 @@ class TextToSpeechDialog extends ComponentDialog {
 
               };
 
-        
-        //const id = uuid();
-
-
-
             await syn(text);
 
 
@@ -228,19 +200,8 @@ class TextToSpeechDialog extends ComponentDialog {
                        .save(path.join(dir, nomeFile + '.mp3'));
                })
            }
-              
 
-           let pathSave;
-           pathSave = await command();
-          
-              
-          
-
-       
-           console.log(dir + " " + nomeFile);
-
-
-          
+           let pathSave = await command();
 
            const localName = nomeFile + '.mp3';
 

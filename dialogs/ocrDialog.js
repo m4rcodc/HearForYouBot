@@ -1,8 +1,4 @@
 'use strict';
-
-const async = require('async');
-const fs = require('fs');
-const http = require('https');
 const path = require("path");
 const sleep = require('util').promisify(setTimeout);
 const ComputerVisionClient = require('@azure/cognitiveservices-computervision').ComputerVisionClient;
@@ -17,20 +13,12 @@ const COMPUTERVISION_ENDPOINT = process.env.ComputerVisionEndpoint;
 const computerVisionClient = new ComputerVisionClient(
     new ApiKeyCredentials({ inHeader: { 'Ocp-Apim-Subscription-Key': COMPUTERVISION_KEY } }), COMPUTERVISION_ENDPOINT);
 
-const axios = require('axios').default;
-const { v4: uuidv4 } = require('uuid');
 
 /**
  * AUTHENTICATE
  * This single client is used for all examples.
  */
 
-const {
-    ActionTypes,
-    ActivityTypes,
-    CardFactory,
-    ActivityHandler
-} = require('botbuilder');
 
 const {
     TextPrompt,
@@ -38,16 +26,13 @@ const {
     DialogSet,
     DialogTurnStatus,
     WaterfallDialog,
-    ThisMemoryScope,
     AttachmentPrompt,
-    Attachment
 } = require('botbuilder-dialogs');
 
 
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const OCR_DIALOG = 'OCR_DIALOG';
 const ATT_PROMPT = 'ATT_PROMPT';
-var value = null;
 
 
 class OcrDialog extends ComponentDialog {
@@ -86,20 +71,17 @@ class OcrDialog extends ComponentDialog {
 
     async downloadAttachStep(step) {
 
+        var value = null;
         const result = step.result; 
         const attach = Object.values(result);
-        console.log(attach);
         for (const key in attach) {
             if (attach.hasOwnProperty(key)) {
                 value = attach[key];
             }
         }
-
-        let resultText;
-        resultText = await computerVision(value.contentUrl);
-       
-     
-       
+   
+        let resultText = await computerVision(value.contentUrl);
+        
         await step.context.sendActivity(resultText);
 
         return await step.endDialog();
@@ -114,7 +96,6 @@ class OcrDialog extends ComponentDialog {
                 // Status strings returned from Read API. NOTE: CASING IS SIGNIFICANT.
                 // Before Read 3.0, these are "Succeeded" and "Failed"
                 const STATUS_SUCCEEDED = "succeeded";
-                const STATUS_FAILED = "failed"
 
                 const remoteImagePath = contentUrl;
 
@@ -148,17 +129,18 @@ class OcrDialog extends ComponentDialog {
                                 console.log(`==== Page: ${page}`);
                             }
                             const result = printedText[page];
-
+                            var count = 0;
                             if (result.lines.length) {
                                 for (const line of result.lines) {
-                                    //console.log(line.words.map(w => w.text).join(' '));
-
-                                    textEdit += line.words.map(w => w.text).join(' '); //appendo i caratteri letti nella variabile globale textedit
-
+                                    textEdit += line.words.map(w => w.text).join(' ');
+                                    textEdit += ' ';
                                 }
 
                             }
-                            else { console.log('No recognized text.'); reject(); }
+                            else {
+                                console.log('No recognized text.');
+                                reject();
+                            }
                         }
                         resolve(textEdit);
                     })

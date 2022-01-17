@@ -1,12 +1,8 @@
 ﻿const {
-    ActionTypes,
-    ActivityTypes,
     CardFactory,
-    MessageFactory,
     InputHints
 } = require('botbuilder');
 
-const { LuisRecognizer } = require('botbuilder-ai');
 
 const { ComponentDialog,
     DialogSet,
@@ -65,7 +61,7 @@ class WelcomeDialog extends ComponentDialog {
 
         var testo = "Con questo bot potrai svolgere diverse funzionalita, tra cui quelle di:" +
             "\n\n🔹Convertire un file audio in testo." +
-            "\n\n🔹Convertire tradurre un file testuale in audio." +
+            "\n\n🔹Convertire un file testuale in audio." +
             "\n\n🔹Tradurre il testo in un \' altra lingua." +
             "\n\n🔹Estrarre del testo da un\'immagine a tua scelta."
 
@@ -74,9 +70,7 @@ class WelcomeDialog extends ComponentDialog {
             [{ url: 'https://i.postimg.cc/432NmVwd/Hear-For-You-Logo.png' }],
             [],
             {
-
                 text: testo
-                //text: 'Sono a tua completa disposizione! Con questo bot potrai svolgere diverse funzionalita, tra cui quelle di SpeechToText per poter tradurre un file audio in testo e viceversa, di Translate per poter tradurre il testo in un \' altra lingua, di ComputerVision per poter estrarre del testo da un \'immagine a tua scelta'
             }
         );
 

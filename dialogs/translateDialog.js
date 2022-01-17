@@ -42,8 +42,6 @@ class TranslateDialog extends ComponentDialog {
             this.chiediLinguaStep.bind(this),
             this.optionLinguaStep.bind(this),
             this.traduciTestoStep.bind(this),
-            //this.askforfinalStep.bind(this),
-            //this.finalStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
@@ -191,7 +189,6 @@ class TranslateDialog extends ComponentDialog {
         
         const option = step.result;
         console.log(option);
-        var prova = null;
 
         var axiosOptions = {
             baseURL: AZURE_TRANSLATE_ENDPOINT,
@@ -219,11 +216,9 @@ class TranslateDialog extends ComponentDialog {
 
             var string = JSON.stringify(res.data,null,4);
             const pos = string.indexOf("to");
-            var stringProva;
-            stringProva =string.substring(167,pos-20);
+            var stringProva =string.substring(167,pos-20);
             
             await step.context.sendActivity(stringProva);
-            
 
             
         }
