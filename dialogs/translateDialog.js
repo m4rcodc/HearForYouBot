@@ -22,9 +22,6 @@ const {
     LuisRecognizer
 } = require('botbuilder-ai');
 
-const {
-    MAIN_DIALOG,
-} = require('./mainDialog.js')
 
 
 const TRANSLATE_DIALOG = 'TRANSLATE_DIALOG';
@@ -188,7 +185,6 @@ class TranslateDialog extends ComponentDialog {
     async traduciTestoStep(step){
         
         const option = step.result;
-        console.log(option);
 
         var axiosOptions = {
             baseURL: AZURE_TRANSLATE_ENDPOINT,
@@ -214,13 +210,8 @@ class TranslateDialog extends ComponentDialog {
 
         if (res.status = 200) {
 
-            var string = JSON.stringify(res.data,null,4);
-            const pos = string.indexOf("to");
-            var stringProva =string.substring(167,pos-20);
-            
-            await step.context.sendActivity(stringProva);
-
-            
+            await step.context.sendActivity(res.data[0].translations[0].text);
+  
         }
 
         return await step.endDialog(this.id);
