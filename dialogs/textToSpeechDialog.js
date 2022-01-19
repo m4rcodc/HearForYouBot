@@ -7,7 +7,11 @@ const AZURE_STORAGE_TOKEN_SAS = process.env.TokenAzureStorageSAS;
 const SPEECH_SERVICE_SUB_KEY = process.env.SpeechServiceSubscriptionKey;
 const SPEECH_SERVICE_REGION = process.env.SpeechserviceRegion;
 
-
+const {
+    ActionTypes,
+    ActivityTypes,
+    CardFactory,
+} = require('botbuilder');
 
 const {
     ComponentDialog,
@@ -31,6 +35,7 @@ const TEXT_PROMPT = 'TEXT_PROMPT';
 var nomeFile = '';
 var globalName = "";
 var globalLocalPath = "";
+var neuralVoiceChoice = "";
 
 class TextToSpeechDialog extends ComponentDialog {
     constructor(userState) {
@@ -41,6 +46,8 @@ class TextToSpeechDialog extends ComponentDialog {
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.askForNameFile.bind(this),
             this.gestioneFileAudio.bind(this),
+            this.askForNeuralVoice.bind(this),
+            this.gestioneNeuralVoice.bind(this),
             this.introStep.bind(this),
             this.textToSpeechStep.bind(this),
        
@@ -74,6 +81,57 @@ class TextToSpeechDialog extends ComponentDialog {
              nomeFile = stepContext.result;
              return await stepContext.next();
 
+    }
+
+    async askForNeuralVoice(step) {
+        const reply = {
+            type: ActivityTypes.Message
+        };
+
+        const buttons = [{
+                type: ActionTypes.ImBack,
+                title: 'Italian Female',
+                value: 'it-IT-IsabellaNeural'
+            },
+            {
+                type: ActionTypes.ImBack,
+                title: 'Italian Male',
+                value: 'it-IT-DiegoNeural'
+            },
+            {
+                type: ActionTypes.ImBack,
+                title: 'English Female',
+                value: 'en-GB-LibbyNeural'
+            },
+            {
+                type: ActionTypes.ImBack,
+                title: 'English Male',
+                value: 'en-GB-RyanNeural'
+            }
+        ];
+
+        const card = CardFactory.heroCard(
+            '',
+            undefined,
+            buttons, {
+                text: 'Seleziona la voce neurale:'
+            }
+        );
+
+        reply.attachments = [card];
+
+        await step.context.sendActivity(reply);
+
+        return await step.prompt(TEXT_PROMPT, {      
+        });
+
+    }
+
+    async gestioneNeuralVoice(stepContext){
+        
+        neuralVoiceChoice = stepContext.result;
+        console.log(neuralVoiceChoice);
+        return await stepContext.next();
     }
 
     async introStep(step) {
@@ -150,11 +208,11 @@ class TextToSpeechDialog extends ComponentDialog {
 
         const dir = path.join(__dirname.replace('dialogs','bots'), '/audio/');
 
-       
+        console.log(neuralVoiceChoice);
         const syn = (text) => {
              return new Promise((resolve,reject) => { 
                     synthesizer.speakSsmlAsync(
-                        `<speak xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xmlns:emo="http://www.w3.org/2009/10/emotionml" version="1.0" xml:lang="en-US"><voice name="it-IT-IsabellaNeural"><mstts:express-as style="customerservice"><prosody rate="-10%" pitch="0%">
+                        `<speak xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xmlns:emo="http://www.w3.org/2009/10/emotionml" version="1.0" xml:lang="en-US"><voice name="${neuralVoiceChoice}"><mstts:express-as style="customerservice"><prosody rate="-10%" pitch="0%">
                                                 ${text}
                                             </prosody>
                                             </mstts:express-as>

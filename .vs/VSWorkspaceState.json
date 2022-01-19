@@ -1,13 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\bots",
-    "\\bots\\audio",
-    "\\cognitiveModels",
-    "\\deploymentScripts",
-    "\\deploymentTemplates",
     "\\dialogs"
   ],
-  "SelectedNode": "\\README.md",
+  "SelectedNode": "\\dialogs\\textToSpeechDialog.js",
   "PreviewInSolutionExplorer": false
 }
