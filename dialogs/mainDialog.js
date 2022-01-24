@@ -87,11 +87,6 @@ class MainDialog extends ComponentDialog {
             return await step.next();
         }
 
-        /*
-        const messageText = step.options.restartMsg ? step.options.restartMsg : 'Come posso aiutarti?\n\nSe vuoi sapere cosa posso fare per te scrivi \"menu\"';
-        const promptMessage = MessageFactory.text(messageText, messageText, InputHints.ExpectingInput);
-        return await step.prompt('TEXT_PROMPT', { prompt: promptMessage });
-        */
         const messageText = 'Come posso aiutarti?\n\nSe vuoi sapere cosa posso fare per te scrivi \"menu\"';
         return await step.prompt(TEXT_PROMPT, {
             prompt: messageText

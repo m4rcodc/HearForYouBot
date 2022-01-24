@@ -90,23 +90,33 @@ class TextToSpeechDialog extends ComponentDialog {
 
         const buttons = [{
                 type: ActionTypes.ImBack,
-                title: 'Italian Female',
-                value: 'it-IT-IsabellaNeural'
-            },
-            {
-                type: ActionTypes.ImBack,
-                title: 'Italian Male',
+                title: 'Italian',
                 value: 'it-IT-DiegoNeural'
             },
             {
                 type: ActionTypes.ImBack,
-                title: 'English Female',
-                value: 'en-GB-LibbyNeural'
+                title: 'English',
+                value: 'en-GB-RyanNeural'
             },
             {
                 type: ActionTypes.ImBack,
-                title: 'English Male',
-                value: 'en-GB-RyanNeural'
+                title: 'German',
+                value: 'de-DE-ConradNeural'
+            },
+            {
+                type: ActionTypes.ImBack,
+                title: 'French',
+                value: 'fr-FR-HenriNeural'
+            },
+            {
+                type: ActionTypes.ImBack,
+                title: 'Spain',
+                value: 'es-ES-AlvaroNeural'
+            },
+            {
+                type: ActionTypes.ImBack,
+                title: 'Russian',
+                value: 'ru-RU-DmitryNeural'
             }
         ];
 

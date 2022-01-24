@@ -127,32 +127,38 @@ class TranslateDialog extends ComponentDialog {
         if (option === "Inglese" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'LinguaInglese' ) {
 
                 linguaScelta = 'en-EN';
+                await step.context.sendActivity("Hai selezionato inglese!");
             
         }
 
         else if (option === "Francese" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'LinguaFrancese') {
 
                 linguaScelta = 'fr-FR';
+                await step.context.sendActivity("Hai selezionato francese!");
         }
 
         else if (option === "Tedesco" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'LinguaTedesca'){
 
                 linguaScelta = 'de-DE';
+                await step.context.sendActivity("Hai selezionato tedesco!");
         }
 
         else if (option === "Spagnolo" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'LinguaSpagnola') {
 
             linguaScelta = 'es-ES';
+            await step.context.sendActivity("Hai selezionato spagnolo!");
         }
 
         else if (option === "Russo" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'LinguaRussa') {
 
             linguaScelta = 'ru-RU';
+            await step.context.sendActivity("Hai selezionato russo!");
         }
 
         else if (option === "Italiano" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'LinguaItaliana') {
 
                 linguaScelta = 'it-IT';
+                await step.context.sendActivity("Hai selezionato italiano!");
         }
 
         else if (option === "Annulla" || LuisRecognizer.topIntent(luisResult, "", 0.7) === 'AnnullaAzione') {

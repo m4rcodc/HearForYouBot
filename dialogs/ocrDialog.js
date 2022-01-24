@@ -3,10 +3,7 @@ const path = require("path");
 const sleep = require('util').promisify(setTimeout);
 const ComputerVisionClient = require('@azure/cognitiveservices-computervision').ComputerVisionClient;
 const ApiKeyCredentials = require('@azure/ms-rest-js').ApiKeyCredentials;
-/**
- * AUTHENTICATE
- * This single client is used for all examples.
- */
+
 const COMPUTERVISION_KEY = process.env.ComputerVisionKey;
 const COMPUTERVISION_ENDPOINT = process.env.ComputerVisionEndpoint;
 
@@ -14,10 +11,7 @@ const computerVisionClient = new ComputerVisionClient(
     new ApiKeyCredentials({ inHeader: { 'Ocp-Apim-Subscription-Key': COMPUTERVISION_KEY } }), COMPUTERVISION_ENDPOINT);
 
 
-/**
- * AUTHENTICATE
- * This single client is used for all examples.
- */
+
 
 
 const {
@@ -93,8 +87,6 @@ class OcrDialog extends ComponentDialog {
 
     async function computerVision(contentUrl) {
         
-                // Status strings returned from Read API. NOTE: CASING IS SIGNIFICANT.
-                // Before Read 3.0, these are "Succeeded" and "Failed"
                 const STATUS_SUCCEEDED = "succeeded";
 
                 const remoteImagePath = contentUrl;
@@ -117,7 +109,7 @@ class OcrDialog extends ComponentDialog {
                     // Wait for read recognition to complete
                     // result.status is initially undefined, since it's the result of read
                     while (result.status !== STATUS_SUCCEEDED) { await sleep(1000); result = await client.getReadResult(operation); }
-                    return result.analyzeResult.readResults; // Return the first page of result. Replace [0] with the desired page if this is a multi-page file such as .pdf or .tiff.
+                    return result.analyzeResult.readResults; // Return the first page of result.
                 }
 
                 const printRecText = (printedText) => {
