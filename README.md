@@ -3,4 +3,4 @@ HearForYouBot È un bot Telegram nato con lo scopo di rendere accessibile alcune
 
 ## Architettura
 
-![Architettura.png](Dialogs/Architettura.png)
+![Architettura.png](bots/Architettura.png)
