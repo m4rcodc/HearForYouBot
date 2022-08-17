@@ -5,5 +5,5 @@
 
 ![Architettura.png](bots/Architettura.png)
 
-**Per una visione completa dei servzi utilizzati nell'implementazione del bot:** [HearForYou-AzureServices.pdf] (). 
+**Per una visione completa dei servzi utilizzati nell'implementazione del bot:** [HearForYou-AzureServices.pdf](https://github.com/marcodc98/HearForYouBot/blob/master/HearForYou-AzureServices.pdf). 
 
